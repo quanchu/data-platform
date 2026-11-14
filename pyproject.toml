@@ -1,0 +1,26 @@
+[project]
+name = "data-platform"
+version = "0.1.0"
+description = "Article ingestion, segmentation, and digest tools"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "beautifulsoup4>=4.14.0",
+    "gliner>=0.2.30",
+    "jupyter>=1.1.1",
+    "requests>=2.32.5",
+    "pydantic>=2.14.3",
+    "pydantic-ai[typesafe]>=2.68.0",
+    "tiktoken>=0.12.0",
+    "markdown-it-py>=4.0.0",
+]
+
+[project.optional-dependencies]
+offline = ["scikit-learn>=1.7", "sentence-transformers>=5.0"]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_platform"]

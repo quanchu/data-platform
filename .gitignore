@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# Notebook and tool caches
+.ipynb_checkpoints/
+.pytest_cache/
+.DS_Store
+
+# Generated extraction reports
+.data/claimify/
