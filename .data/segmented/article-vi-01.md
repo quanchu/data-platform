@@ -1,0 +1,29 @@
+# CỤC ĐĂNG KIỂM VIỆT NAM PHỐI HỢP VỚI VINFAST TỔ CHỨC KHÓA ĐÀO TẠO NÂNG CAO NĂNG LỰC KIỂM THỬ Ô TÔ
+
+Ngày đăng bài 22-09-2026
+
+## Cục Đăng kiểm Việt Nam\, VinFast và JASIC phối hợp tổ chức khóa đào tạo quy định kỹ thuật của Liên Hợp Quốc\.
+
+Từ ngày 7/9 - 11/9/2026, tại Trung tâm Thử nghiệm VinFast (Hải Phòng), Cục Đăng kiểm Việt Nam phối hợp với VinFast và Trung tâm Quốc tế hóa Tiêu chuẩn Ô tô Nhật Bản (JASIC) tổ chức khóa đào tạo các quy định kỹ thuật của Liên Hợp Quốc (UN Regulations) dành cho cán bộ quản lý của các đơn vị kiểm thử, chứng nhận an toàn xe cơ giới. Sự kiện không chỉ cho thấy vai trò và đóng góp ngày càng lớn của Việt Nam trong việc nâng cao chất lượng, tiêu chuẩn an toàn kỹ thuật trong ngành công nghiệp sản xuất ô tô, mà còn cho thấy định hướng phát triển sản phẩm đề cao chất lượng và an toàn của VinFast, cũng như khẳng định năng lực kiểm thử đẳng cấp quốc tế của Trung tâm Thử nghiệm VinFast.
+
+Tham gia khóa đào tạo gồm các chuyên gia, cán bộ quản lý tại các đơn vị kỹ thuật, trung tâm thử nghiệm an toàn ô tô tại Việt Nam và các quốc gia trong khu vực châu Á. Chương trình được chủ trì thực hiện bởi Cục Đăng kiểm Việt Nam; VinFast cung cấp cơ sở vật chất, các điều kiện kỹ thuật cần thiết cho toàn bộ chương trình và trực tiếp đào tạo lý thuyết, thực hành thử nghiệm an toàn va chạm theo quy chuẩn UN R94 (va chạm trước) và UN R95 (va chạm bên hông); Trung tâm Quốc tế hóa Tiêu chuẩn Ô tô Nhật Bản (JASIC) đào tạo về hai quy chuẩn UN R100 (an toàn hệ thống điện áp cao) và UN R154 (đánh giá tiêu thụ năng lượng theo chu trình WLTP), đồng thời cấp chứng nhận hoàn thành khóa đào tạo cho các thành viên tham gia.
+
+Khóa đào tạo có ý nghĩa đặc biệt quan trọng đối với các tổ chức, cá nhân đang hoạt động trong lĩnh vực kiểm thử, chứng nhận an toàn và phê duyệt kiểu loại xe cơ giới của Việt Nam và các nước trong khu vực châu Á. Chương trình giúp nâng cao năng lực cán bộ, trang bị các kiến thức, kỹ năng cần thiết để sẵn sàng áp dụng các quy định kỹ thuật của Liên Hợp Quốc và quy trình thử nghiệm tiên tiến, trong bối cảnh ngành công nghiệp ô tô Việt Nam và khu vực đang chuyển dịch mạnh mẽ sang các loại hình phương tiện xanh sử dụng điện.
+
+Đóng góp quan trọng vào thành công của chương trình là sự hỗ trợ về cơ sở vật chất, trang thiết bị hiện đại và đội ngũ kỹ sư chuyên nghiệp của VinFast. Đây là cơ sở được đầu tư đồng bộ hệ thống phòng thí nghiệm, trang thiết bị và các điều kiện kỹ thuật đáp ứng yêu cầu thử nghiệm theo tiêu chuẩn quốc tế. Trong đó, nổi bật là Trung tâm Kiểm thử An toàn xe với hệ thống đường ray thử nghiệm va chạm dài 250 m, hệ thống điều khiển hiện đại, cho phép thực hiện nhiều bài thử như va chạm trực diện, va chạm lệch tâm, va chạm xe với xe, va chạm bên, va chạm cột, va chạm phía sau… với tốc độ lên tới 120 km/h.
+
+## Hệ thống RAST cho phép thực hiện các bài thử và nghiên cứu chuyên sâu về ghế ngồi\, dây đai an toàn và hệ thống túi khí\.
+
+Hệ thống thử nghiệm Xe trượt gia tốc ngược (Reverse Acceleration Sled Test - RAST) cho phép thực hiện các bài thử và nghiên cứu chuyên sâu cho ghế ngồi, dây đai an toàn và hệ thống túi khí. Trung tâm cũng được trang bị toàn bộ hình nộm thử nghiệm, đầy đủ chủng loại cho yêu cầu thử nghiệm toàn cầu, từ hình nộm dành cho người lớn đến trẻ em, tiêu biểu như Hybrid III, THOR, EuroSID, WorldSID, Q-Series.
+
+## Trung tâm Thử nghiệm VinFast đã đầu tư phòng hiệu chuẩn hình nộm với trang thiết bị hiện đại hàng đầu thế giới\.
+
+Một phòng hiệu chuẩn hình nộm với trang thiết bị hiện đại hàng đầu thế giới cũng được đầu tư để làm chủ quá trình vận hành. Bên cạnh đó, Trung tâm còn được trang bị hệ thống đầy đủ các rào cản cho yêu cầu thử nghiệm toàn cầu, tiêu biểu như ODB, MPDB, SOB, MDB, AE-MDB, IIHS MDB; khoảng 1.000 cảm biến gia tốc cùng hơn 500 kênh thu thập dữ liệu; hệ thống đèn chiếu sáng tốc độ cao; hệ thống camera tốc độ cao giúp ghi nhận đầy đủ diễn biến của thử nghiệm đã và đang được vận hành.
+
+Với hệ thống thử nghiệm va chạm toàn xe trong nhà và ngoài trời, hệ thống xe trượt gia tốc ngược, phòng hiệu chuẩn hình nộm thử nghiệm va chạm cùng hệ thống thiết bị đo lường hiện đại, Trung tâm có thể triển khai đầy đủ các bài thử theo yêu cầu của các chương trình đánh giá an toàn trên toàn cầu như UN ECE, FMVSS, AIS… và các yêu cầu đánh giá khắt khe hơn để xếp hạng sao trên thế giới như Euro NCAP, US NCAP, ASEAN NCAP, Bharat NCAP…
+
+Không chỉ phục vụ nhu cầu thử nghiệm của VinFast nhằm đảm bảo chất lượng, tiêu chuẩn an toàn cao nhất, Trung tâm Thử nghiệm VinFast còn hướng đến mục tiêu trở thành trung tâm thử nghiệm hàng đầu của khu vực Đông Nam Á và là địa chỉ tin cậy cho các hoạt động thử nghiệm, đánh giá chất lượng phương tiện của nhiều đối tác trong và ngoài nước, đồng thời mở ra những cơ hội hợp tác quốc tế sâu rộng hơn trong lĩnh vực thử nghiệm an toàn và chứng nhận ô tô.
+
+## Việc đầu tư cơ sở vật chất cho hệ thống kiểm thử và tham gia đào tạo\, trao đổi kỹ thuật quốc tế cho thấy VinFast theo đuổi định hướng phát triển sản phẩm đề cao chất lượng và an toàn\.
+
+Việc đầu tư cơ sở vật chất bài bản, đồng bộ cho hệ thống kiểm thử, đồng thời tham gia sâu vào các hoạt động đào tạo, trao đổi kinh nghiệm kỹ thuật quốc tế cũng cho thấy định hướng phát triển sản phẩm đề cao chất lượng và an toàn của VinFast. Không chỉ đẩy mạnh nghiên cứu - phát triển để mang đến cho người tiêu dùng những sản phẩm ngày càng tốt hơn, VinFast còn đang góp phần xây dựng nền móng vững chắc cho sự phát triển lâu dài của ngành công nghiệp ô tô Việt Nam và khu vực./.
