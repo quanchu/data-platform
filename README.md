@@ -39,6 +39,19 @@ tests/               # package and crawler tests
 The previous top-level `digest` and `ingest` imports now live under
 `data_platform.digest` and `data_platform.ingest`.
 
+## Processing methods
+
+Each method has its own usage, input/output, and verification guide:
+
+| Method | Purpose |
+| --- | --- |
+| [Vingroup crawler](src/data_platform/ingest/crawler/README.md) | Discover news links and fetch article bodies into JSONL. |
+| [TextTiling](src/data_platform/digest/segmenter/texttiling/README.md) | Lexical or embedding-based segmentation with optional heading generation. |
+| [End-to-end LLM segmentation](src/data_platform/digest/segmenter/llm_e2e/README.md) | Generate section boundaries and headings together. |
+| [Claimify](src/data_platform/digest/claimify/README.md) | Extract verifiable factual claims with semantic checks and repairs. |
+| [Reference resolution → OpenIE](src/data_platform/digest/openie/README.md) | Extract relation tuples and claim text through two injectable stages. |
+| [GLiNER placeholder](src/data_platform/digest/gliner/README.md) | Reserved for tagging; no implementation yet. |
+
 ## Vingroup news crawler
 
 Run from the repository root with Python 3.14 and uv:
@@ -325,3 +338,75 @@ without converting them into Markdown headings.
 
 See [the LLM notebook](notebooks/llm_e2e_segmentation.ipynb) for the one-call API,
 intermediate results, credential loading, and optional UTF-8 saving.
+
+## Reference resolution → OpenIE
+
+`data_platform.digest.openie` provides an independent two-stage alternative to
+Claimify, using the same segmented Markdown input (one H1 and H2 sections):
+
+```python
+from data_platform.digest.openie import extract_claims
+
+result = await extract_claims(
+    "# Report\n\n## Factory\n\nAcme builds cars. It plans buses.",
+    resolution_model="openai:gpt-6-luna",
+    extraction_model="openai:gpt-6-luna",
+    max_concurrency=4,
+)
+for claim in result.claims:
+    print(claim.subject, claim.relation, claim.object, claim.qualifiers)
+    print(claim.text, claim.start, claim.end)
+```
+
+Both models also accept configured Pydantic AI model instances. Defaults use
+process OpenAI credentials. Resolution receives the title, subtitle, and full
+original enclosing section, including excluded source blocks; it never receives
+another section. It returns a record per target sentence, replacement evidence,
+and `resolved`, `unchanged`, or `unresolved` status. Unresolved sentences skip
+extraction. Headings, code, HTML blocks, and tables are not extraction targets.
+English and Vietnamese are supported through prompts; semantic quality requires
+review. Context is never silently truncated.
+
+Extraction receives original and resolved target sentences and returns atomic
+propositions with optional objects, qualifiers, and standalone claim text.
+Qualifiers retain time, location, conditions, negation, modality, and attribution.
+Opinions and reported statements retain attribution; these are extracted
+propositions, not externally verified facts. No semantic verification stage or
+cross-sentence deduplication is performed.
+
+Results preserve source order and original half-open Python character offsets.
+Offsets describe the supporting original sentence, not a span in rewritten text.
+Sentence outcomes are `extracted`, `no_claims`, or `unresolved_ambiguity`.
+`result.resolution_stages` records each section's resolution once;
+`result.sentences[*].stages` records extraction. Both include backend/model identity
+and available usage. Blank input makes no calls. Invalid Markdown or concurrency
+raises `ValueError`; backend failures raise `OpenIEError` with section, optional
+sentence, stage, and original cause. Pending workers are cancelled and awaited.
+
+To inject dedicated NLP models, implement either exported async protocol:
+
+- `ReferenceResolver.resolve(*, title, section) -> ResolutionResponse`
+- `PropositionExtractor.extract(*, sentence, resolved) -> ExtractionResponse`
+
+Pass instances as `resolver=` and/or `extractor=`; mixed LLM/dedicated pipelines
+are supported. Injected adapters own their configuration; the corresponding
+`*_model` option only configures the default LLM backend. Responses include
+`BackendMetadata(backend=..., model=..., usage=...)`. Adapters return the exported
+typed records and must preserve sentence IDs and valid section-local evidence.
+Invalid output raises a contextual error. LLM outputs have two validation retries.
+Use async inference or offload blocking inference to a thread; configure
+`max_concurrency=1` for backends that cannot handle concurrent calls. V1 does not
+bundle or download dedicated models. See [the notebook](notebooks/openie.ipynb)
+for inspection and an adapter example.
+
+Offline tests require no provider calls. An optional live review report includes
+latency, stage usage, expected propositions, and empty human-review fields:
+
+```sh
+uv run python -m unittest discover -s tests -p 'test_openie.py' -v
+uv run python -m data_platform.digest.openie.evaluate tests/fixtures/openie/cases.json --live --output /tmp/openie-review.json
+```
+
+Use `--resolution-model` and `--extraction-model` to override evaluation models.
+Review reference correctness, entailment, qualifier preservation, and coverage;
+status matches alone do not establish semantic accuracy.

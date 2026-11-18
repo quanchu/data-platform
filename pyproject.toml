@@ -13,6 +13,7 @@ dependencies = [
     "pydantic-ai[typesafe]>=2.68.0",
     "tiktoken>=0.12.0",
     "markdown-it-py>=4.0.0",
+    "numpy>=2.0",
 ]
 
 [project.optional-dependencies]

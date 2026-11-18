@@ -2,37 +2,12 @@
 
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import Field, StringConstraints
+
+from ..source import Document, Record, Section, Sentence, Span
 
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
-
-class Record(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-
-class Span(Record):
-    start: int
-    end: int
-
-
-class Sentence(Span):
-    index: int
-    section_index: int
-    text: str
-
-
-class Section(Span):
-    index: int
-    subtitle: str
-    text: str
-    sentences: list[Sentence] = Field(default_factory=list)
-    excluded_spans: list[Span] = Field(default_factory=list)
-
-
-class Document(Record):
-    title: str
-    sections: list[Section] = Field(default_factory=list)
 
 
 class Rewrite(Record):

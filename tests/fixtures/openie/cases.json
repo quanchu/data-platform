@@ -1,0 +1,79 @@
+[
+  {
+    "id": "en_pronoun",
+    "markdown": "# Report\n## Factory\nAcme builds cars. It plans to build buses in Hanoi in 2027.",
+    "expected_statuses": [
+      "extracted",
+      "extracted"
+    ],
+    "expected_propositions": [
+      "Acme builds cars.",
+      "Acme plans to build buses in Hanoi in 2027."
+    ]
+  },
+  {
+    "id": "vi_alias",
+    "markdown": "# Tin tức\n## Công ty\nCông ty ABC sản xuất xe điện. ABC không bán xe xăng.",
+    "expected_statuses": [
+      "extracted",
+      "extracted"
+    ],
+    "expected_propositions": [
+      "Công ty ABC sản xuất xe điện.",
+      "Công ty ABC không bán xe xăng."
+    ]
+  },
+  {
+    "id": "en_quote",
+    "markdown": "# Report\n## Statement\nLan said, “We may open a factory if demand grows.”",
+    "expected_statuses": [
+      "unresolved_ambiguity"
+    ],
+    "expected_propositions": [],
+    "review_note": "We has no unambiguous organization antecedent."
+  },
+  {
+    "id": "vi_quote",
+    "markdown": "# Tin\n## Phát biểu\nLan nói: “Nhà máy có thể mở cửa vào năm 2027.”",
+    "expected_statuses": [
+      "extracted"
+    ],
+    "expected_propositions": [
+      "Lan nói nhà máy có thể mở cửa vào năm 2027."
+    ]
+  },
+  {
+    "id": "multiple",
+    "markdown": "# Report\n## Operations\nAcme builds cars and sells batteries.",
+    "expected_statuses": [
+      "extracted"
+    ],
+    "expected_propositions": [
+      "Acme builds cars.",
+      "Acme sells batteries."
+    ]
+  },
+  {
+    "id": "section_isolation",
+    "markdown": "# Report\n## First\nAcme builds cars.\n## Second\nIt sells batteries.",
+    "expected_statuses": [
+      "extracted",
+      "unresolved_ambiguity"
+    ],
+    "expected_propositions": [
+      "Acme builds cars."
+    ]
+  },
+  {
+    "id": "vi_reference",
+    "markdown": "# Tin\n## Lãnh đạo\nLan quản lý nhà máy. Cô ấy dự định mở rộng nhà máy nếu nhu cầu tăng.",
+    "expected_statuses": [
+      "extracted",
+      "extracted"
+    ],
+    "expected_propositions": [
+      "Lan quản lý nhà máy.",
+      "Lan dự định mở rộng nhà máy nếu nhu cầu tăng."
+    ]
+  }
+]
