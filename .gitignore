@@ -17,7 +17,13 @@ wheels/
 # Notebook and tool caches
 .ipynb_checkpoints/
 .pytest_cache/
+.ruff_cache/
 .DS_Store
 
 # Generated extraction reports
 .data/claimify/
+.data/openie/
+.data/claims/
+.data/claims-demo/
+.data/gliner/
+.data/reports/

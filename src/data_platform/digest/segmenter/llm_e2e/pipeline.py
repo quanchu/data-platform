@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from pydantic_ai import Agent, ModelRetry
 from pydantic_ai.models import Model
 
-from ..texttiling.quotations import quotation_spans
+from ..._text.quotations import quotation_spans
 
 DEFAULT_MODEL = "openai:gpt-6-astra"
 RESERVED_MARKER = "<SECTION_BOUNDARY>"

@@ -8,13 +8,13 @@ from collections import Counter
 from dataclasses import replace
 from typing import Literal
 
+from ..._text.quotations import body_spans, prose_paragraphs
 from .document_structure import (
     DocumentStructure,
     document_parts,
     parse_document_structure,
 )
 from .models import Section
-from .quotations import body_spans, prose_paragraphs
 
 _WORD = re.compile(r"[^\W_]+(?:[\u0300-\u036f][^\W_]*)*", re.UNICODE)
 

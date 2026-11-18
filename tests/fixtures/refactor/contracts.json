@@ -1,0 +1,1667 @@
+{
+  "document": {
+    "title": "Báo cáo",
+    "sections": [
+      {
+        "start": 19,
+        "end": 55,
+        "index": 0,
+        "subtitle": "Acme",
+        "text": "\nAcme plans two factories in 2028.\n\n",
+        "sentences": [
+          {
+            "start": 20,
+            "end": 53,
+            "index": 0,
+            "section_index": 0,
+            "text": "Acme plans two factories in 2028."
+          }
+        ],
+        "excluded_spans": []
+      },
+      {
+        "start": 66,
+        "end": 81,
+        "index": 1,
+        "subtitle": "Results",
+        "text": "\nRevenue grew.\n",
+        "sentences": [
+          {
+            "start": 67,
+            "end": 80,
+            "index": 1,
+            "section_index": 1,
+            "text": "Revenue grew."
+          }
+        ],
+        "excluded_spans": []
+      }
+    ]
+  },
+  "claimify": {
+    "document": {
+      "title": "Báo cáo",
+      "sections": [
+        {
+          "start": 19,
+          "end": 55,
+          "index": 0,
+          "subtitle": "Acme",
+          "text": "\nAcme plans two factories in 2028.\n\n",
+          "sentences": [
+            {
+              "start": 20,
+              "end": 53,
+              "index": 0,
+              "section_index": 0,
+              "text": "Acme plans two factories in 2028."
+            }
+          ],
+          "excluded_spans": []
+        },
+        {
+          "start": 66,
+          "end": 81,
+          "index": 1,
+          "subtitle": "Results",
+          "text": "\nRevenue grew.\n",
+          "sentences": [
+            {
+              "start": 67,
+              "end": 80,
+              "index": 1,
+              "section_index": 1,
+              "text": "Revenue grew."
+            }
+          ],
+          "excluded_spans": []
+        }
+      ]
+    },
+    "sentences": [
+      {
+        "start": 20,
+        "end": 53,
+        "index": 0,
+        "section_index": 0,
+        "text": "Acme plans two factories in 2028.",
+        "selected_text": "Acme plans two factories in 2028.",
+        "clarified_text": "Acme plans two factories in 2028.",
+        "claims": [
+          {
+            "start": 20,
+            "end": 53,
+            "text": "Acme plans two factories in 2028.",
+            "section_index": 0,
+            "sentence_index": 0
+          }
+        ],
+        "stages": [
+          {
+            "stage": "selection",
+            "output": {
+              "verdict": "fully_verifiable"
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 75,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 5,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          },
+          {
+            "stage": "ambiguity",
+            "output": {
+              "referential": "absent",
+              "structural": "absent",
+              "expand_names": false
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 83,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 8,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          },
+          {
+            "stage": "generate",
+            "output": {
+              "claims": [
+                "Acme plans two factories in 2028."
+              ]
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 90,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 11,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          },
+          {
+            "stage": "claim_check",
+            "output": {
+              "supported": true,
+              "verifiable": true,
+              "contextual": true
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 98,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 8,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          },
+          {
+            "stage": "coverage",
+            "output": {
+              "complete": true
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 98,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 4,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          }
+        ],
+        "status": "extracted"
+      },
+      {
+        "start": 67,
+        "end": 80,
+        "index": 1,
+        "section_index": 1,
+        "text": "Revenue grew.",
+        "selected_text": "Revenue grew.",
+        "clarified_text": "Revenue grew.",
+        "claims": [
+          {
+            "start": 67,
+            "end": 80,
+            "text": "Revenue grew.",
+            "section_index": 1,
+            "sentence_index": 1
+          }
+        ],
+        "stages": [
+          {
+            "stage": "selection",
+            "output": {
+              "verdict": "fully_verifiable"
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 67,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 5,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          },
+          {
+            "stage": "ambiguity",
+            "output": {
+              "referential": "absent",
+              "structural": "absent",
+              "expand_names": false
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 71,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 8,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          },
+          {
+            "stage": "generate",
+            "output": {
+              "claims": [
+                "Revenue grew."
+              ]
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 74,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 7,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          },
+          {
+            "stage": "claim_check",
+            "output": {
+              "supported": true,
+              "verifiable": true,
+              "contextual": true
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 78,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 8,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          },
+          {
+            "stage": "coverage",
+            "output": {
+              "complete": true
+            },
+            "model": "function:inner:",
+            "confidence": null,
+            "usage": {
+              "input_tokens": 78,
+              "cache_write_tokens": 0,
+              "cache_write_1h_tokens": 0,
+              "cache_read_tokens": 0,
+              "output_tokens": 4,
+              "unmeasured_requests": 0,
+              "output_reasoning_tokens": 0,
+              "input_audio_tokens": 0,
+              "cache_audio_read_tokens": 0,
+              "output_audio_tokens": 0,
+              "audio_seconds": 0,
+              "details": {},
+              "cost": null,
+              "requests": 1,
+              "tool_calls": 0
+            }
+          }
+        ],
+        "status": "extracted"
+      }
+    ],
+    "claims": [
+      {
+        "start": 20,
+        "end": 53,
+        "text": "Acme plans two factories in 2028.",
+        "section_index": 0,
+        "sentence_index": 0
+      },
+      {
+        "start": 67,
+        "end": 80,
+        "text": "Revenue grew.",
+        "section_index": 1,
+        "sentence_index": 1
+      }
+    ],
+    "requested_models": {
+      "decision": "function:inner:",
+      "generation": "function:inner:"
+    }
+  },
+  "openie": {
+    "document": {
+      "title": "Báo cáo",
+      "sections": [
+        {
+          "start": 19,
+          "end": 55,
+          "index": 0,
+          "subtitle": "Acme",
+          "text": "\nAcme plans two factories in 2028.\n\n",
+          "sentences": [
+            {
+              "start": 20,
+              "end": 53,
+              "index": 0,
+              "section_index": 0,
+              "text": "Acme plans two factories in 2028."
+            }
+          ],
+          "excluded_spans": []
+        },
+        {
+          "start": 66,
+          "end": 81,
+          "index": 1,
+          "subtitle": "Results",
+          "text": "\nRevenue grew.\n",
+          "sentences": [
+            {
+              "start": 67,
+              "end": 80,
+              "index": 1,
+              "section_index": 1,
+              "text": "Revenue grew."
+            }
+          ],
+          "excluded_spans": []
+        }
+      ]
+    },
+    "sentences": [
+      {
+        "start": 20,
+        "end": 53,
+        "index": 0,
+        "section_index": 0,
+        "text": "Acme plans two factories in 2028.",
+        "resolution": {
+          "sentence_index": 0,
+          "text": "Acme plans two factories in 2028.",
+          "status": "unchanged",
+          "replacements": []
+        },
+        "status": "extracted",
+        "claims": [
+          {
+            "start": 20,
+            "end": 53,
+            "subject": "Fixture",
+            "relation": "states",
+            "object": "Acme plans two factories in 2028.",
+            "qualifiers": [],
+            "text": "Acme plans two factories in 2028.",
+            "section_index": 0,
+            "sentence_index": 0
+          }
+        ],
+        "stages": [
+          {
+            "stage": "extraction",
+            "output": {
+              "propositions": [
+                {
+                  "subject": "Fixture",
+                  "relation": "states",
+                  "object": "Acme plans two factories in 2028.",
+                  "qualifiers": [],
+                  "text": "Acme plans two factories in 2028."
+                }
+              ]
+            },
+            "metadata": {
+              "backend": "fixture",
+              "model": null,
+              "usage": {}
+            }
+          }
+        ]
+      },
+      {
+        "start": 67,
+        "end": 80,
+        "index": 1,
+        "section_index": 1,
+        "text": "Revenue grew.",
+        "resolution": {
+          "sentence_index": 1,
+          "text": "Revenue grew.",
+          "status": "unchanged",
+          "replacements": []
+        },
+        "status": "extracted",
+        "claims": [
+          {
+            "start": 67,
+            "end": 80,
+            "subject": "Fixture",
+            "relation": "states",
+            "object": "Revenue grew.",
+            "qualifiers": [],
+            "text": "Revenue grew.",
+            "section_index": 1,
+            "sentence_index": 1
+          }
+        ],
+        "stages": [
+          {
+            "stage": "extraction",
+            "output": {
+              "propositions": [
+                {
+                  "subject": "Fixture",
+                  "relation": "states",
+                  "object": "Revenue grew.",
+                  "qualifiers": [],
+                  "text": "Revenue grew."
+                }
+              ]
+            },
+            "metadata": {
+              "backend": "fixture",
+              "model": null,
+              "usage": {}
+            }
+          }
+        ]
+      }
+    ],
+    "claims": [
+      {
+        "start": 20,
+        "end": 53,
+        "subject": "Fixture",
+        "relation": "states",
+        "object": "Acme plans two factories in 2028.",
+        "qualifiers": [],
+        "text": "Acme plans two factories in 2028.",
+        "section_index": 0,
+        "sentence_index": 0
+      },
+      {
+        "start": 67,
+        "end": 80,
+        "subject": "Fixture",
+        "relation": "states",
+        "object": "Revenue grew.",
+        "qualifiers": [],
+        "text": "Revenue grew.",
+        "section_index": 1,
+        "sentence_index": 1
+      }
+    ],
+    "resolution_stages": {
+      "0": {
+        "stage": "resolution",
+        "output": {
+          "sentences": [
+            {
+              "sentence_index": 0,
+              "text": "Acme plans two factories in 2028.",
+              "status": "unchanged",
+              "replacements": []
+            }
+          ]
+        },
+        "metadata": {
+          "backend": "fixture",
+          "model": null,
+          "usage": {}
+        }
+      },
+      "1": {
+        "stage": "resolution",
+        "output": {
+          "sentences": [
+            {
+              "sentence_index": 1,
+              "text": "Revenue grew.",
+              "status": "unchanged",
+              "replacements": []
+            }
+          ]
+        },
+        "metadata": {
+          "backend": "fixture",
+          "model": null,
+          "usage": {}
+        }
+      }
+    }
+  },
+  "requests": [
+    [
+      "decision",
+      [
+        "verdict"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Acme",
+        "section_content": "\nAcme plans two factories in 2028.\n\n",
+        "target_sentence": "Acme plans two factories in 2028.",
+        "sentence_index": 0,
+        "question": null
+      }
+    ],
+    [
+      "decision",
+      [
+        "referential",
+        "structural",
+        "expand_names"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Acme",
+        "section_content": "\nAcme plans two factories in 2028.\n\n",
+        "target_sentence": "Acme plans two factories in 2028.",
+        "sentence_index": 0,
+        "question": null,
+        "selected_text": "Acme plans two factories in 2028."
+      }
+    ],
+    [
+      "generation",
+      [
+        "claims"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Acme",
+        "section_content": "\nAcme plans two factories in 2028.\n\n",
+        "target_sentence": "Acme plans two factories in 2028.",
+        "sentence_index": 0,
+        "question": null,
+        "selected_text": "Acme plans two factories in 2028.",
+        "clarified_text": "Acme plans two factories in 2028."
+      }
+    ],
+    [
+      "decision",
+      [
+        "supported",
+        "verifiable",
+        "contextual"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Acme",
+        "section_content": "\nAcme plans two factories in 2028.\n\n",
+        "target_sentence": "Acme plans two factories in 2028.",
+        "sentence_index": 0,
+        "question": null,
+        "selected_text": "Acme plans two factories in 2028.",
+        "clarified_text": "Acme plans two factories in 2028.",
+        "candidate": "Acme plans two factories in 2028.",
+        "claim_index": 0
+      }
+    ],
+    [
+      "decision",
+      [
+        "complete"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Acme",
+        "section_content": "\nAcme plans two factories in 2028.\n\n",
+        "target_sentence": "Acme plans two factories in 2028.",
+        "sentence_index": 0,
+        "question": null,
+        "selected_text": "Acme plans two factories in 2028.",
+        "clarified_text": "Acme plans two factories in 2028.",
+        "candidate_claims": [
+          "Acme plans two factories in 2028."
+        ]
+      }
+    ],
+    [
+      "decision",
+      [
+        "verdict"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Results",
+        "section_content": "\nRevenue grew.\n",
+        "target_sentence": "Revenue grew.",
+        "sentence_index": 1,
+        "question": null
+      }
+    ],
+    [
+      "decision",
+      [
+        "referential",
+        "structural",
+        "expand_names"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Results",
+        "section_content": "\nRevenue grew.\n",
+        "target_sentence": "Revenue grew.",
+        "sentence_index": 1,
+        "question": null,
+        "selected_text": "Revenue grew."
+      }
+    ],
+    [
+      "generation",
+      [
+        "claims"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Results",
+        "section_content": "\nRevenue grew.\n",
+        "target_sentence": "Revenue grew.",
+        "sentence_index": 1,
+        "question": null,
+        "selected_text": "Revenue grew.",
+        "clarified_text": "Revenue grew."
+      }
+    ],
+    [
+      "decision",
+      [
+        "supported",
+        "verifiable",
+        "contextual"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Results",
+        "section_content": "\nRevenue grew.\n",
+        "target_sentence": "Revenue grew.",
+        "sentence_index": 1,
+        "question": null,
+        "selected_text": "Revenue grew.",
+        "clarified_text": "Revenue grew.",
+        "candidate": "Revenue grew.",
+        "claim_index": 0
+      }
+    ],
+    [
+      "decision",
+      [
+        "complete"
+      ],
+      {
+        "document_title": "Báo cáo",
+        "section_subtitle": "Results",
+        "section_content": "\nRevenue grew.\n",
+        "target_sentence": "Revenue grew.",
+        "sentence_index": 1,
+        "question": null,
+        "selected_text": "Revenue grew.",
+        "clarified_text": "Revenue grew.",
+        "candidate_claims": [
+          "Revenue grew."
+        ]
+      }
+    ]
+  ],
+  "records": [
+    {
+      "id": "0fde9486eb498f787a1dad08c21814e470e00eee35a51119e889f6504fba15f1",
+      "text": "Acme plans two factories in 2028.",
+      "source": "article.md",
+      "document_hash": "d2f34950e0c48a1fb30ce078106558bf9d19a366d9b19b22442bcae0b918edae",
+      "document_title": "Báo cáo",
+      "original_sentence": "Acme plans two factories in 2028.",
+      "section_title": "Acme",
+      "section_index": 0,
+      "sentence_index": 0,
+      "start": 20,
+      "end": 53
+    },
+    {
+      "id": "8e3b27e6af9b9e883becbf4048a1479631222c707b496f4c3a10d454a297eef6",
+      "text": "Revenue grew.",
+      "source": "article.md",
+      "document_hash": "d2f34950e0c48a1fb30ce078106558bf9d19a366d9b19b22442bcae0b918edae",
+      "document_title": "Báo cáo",
+      "original_sentence": "Revenue grew.",
+      "section_title": "Results",
+      "section_index": 1,
+      "sentence_index": 1,
+      "start": 67,
+      "end": 80
+    }
+  ],
+  "schemas": {
+    "claimify": {
+      "$defs": {
+        "Claim": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            },
+            "text": {
+              "title": "Text",
+              "type": "string"
+            },
+            "section_index": {
+              "title": "Section Index",
+              "type": "integer"
+            },
+            "sentence_index": {
+              "title": "Sentence Index",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "text",
+            "section_index",
+            "sentence_index"
+          ],
+          "title": "Claim",
+          "type": "object"
+        },
+        "Document": {
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "title": "Title",
+              "type": "string"
+            },
+            "sections": {
+              "items": {
+                "$ref": "#/$defs/Section"
+              },
+              "title": "Sections",
+              "type": "array"
+            }
+          },
+          "required": [
+            "title"
+          ],
+          "title": "Document",
+          "type": "object"
+        },
+        "Section": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            },
+            "index": {
+              "title": "Index",
+              "type": "integer"
+            },
+            "subtitle": {
+              "title": "Subtitle",
+              "type": "string"
+            },
+            "text": {
+              "title": "Text",
+              "type": "string"
+            },
+            "sentences": {
+              "items": {
+                "$ref": "#/$defs/Sentence"
+              },
+              "title": "Sentences",
+              "type": "array"
+            },
+            "excluded_spans": {
+              "items": {
+                "$ref": "#/$defs/Span"
+              },
+              "title": "Excluded Spans",
+              "type": "array"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "index",
+            "subtitle",
+            "text"
+          ],
+          "title": "Section",
+          "type": "object"
+        },
+        "Sentence": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            },
+            "index": {
+              "title": "Index",
+              "type": "integer"
+            },
+            "section_index": {
+              "title": "Section Index",
+              "type": "integer"
+            },
+            "text": {
+              "title": "Text",
+              "type": "string"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "index",
+            "section_index",
+            "text"
+          ],
+          "title": "Sentence",
+          "type": "object"
+        },
+        "SentenceResult": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            },
+            "index": {
+              "title": "Index",
+              "type": "integer"
+            },
+            "section_index": {
+              "title": "Section Index",
+              "type": "integer"
+            },
+            "text": {
+              "title": "Text",
+              "type": "string"
+            },
+            "selected_text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Selected Text"
+            },
+            "clarified_text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Clarified Text"
+            },
+            "claims": {
+              "items": {
+                "$ref": "#/$defs/Claim"
+              },
+              "title": "Claims",
+              "type": "array"
+            },
+            "stages": {
+              "items": {
+                "$ref": "#/$defs/StageRecord"
+              },
+              "title": "Stages",
+              "type": "array"
+            },
+            "status": {
+              "default": "no_verifiable_claims",
+              "enum": [
+                "extracted",
+                "no_verifiable_claims",
+                "unresolved_ambiguity",
+                "validation_failed"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "index",
+            "section_index",
+            "text"
+          ],
+          "title": "SentenceResult",
+          "type": "object"
+        },
+        "Span": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "title": "Span",
+          "type": "object"
+        },
+        "StageRecord": {
+          "additionalProperties": false,
+          "properties": {
+            "stage": {
+              "title": "Stage",
+              "type": "string"
+            },
+            "output": {
+              "additionalProperties": true,
+              "title": "Output",
+              "type": "object"
+            },
+            "model": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Model"
+            },
+            "confidence": {
+              "default": null,
+              "title": "Confidence"
+            },
+            "usage": {
+              "additionalProperties": true,
+              "title": "Usage",
+              "type": "object"
+            }
+          },
+          "required": [
+            "stage",
+            "output"
+          ],
+          "title": "StageRecord",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "document": {
+          "$ref": "#/$defs/Document"
+        },
+        "sentences": {
+          "items": {
+            "$ref": "#/$defs/SentenceResult"
+          },
+          "title": "Sentences",
+          "type": "array"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "title": "Claims",
+          "type": "array"
+        },
+        "requested_models": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Requested Models",
+          "type": "object"
+        }
+      },
+      "required": [
+        "document"
+      ],
+      "title": "ExtractionResult",
+      "type": "object"
+    },
+    "openie": {
+      "$defs": {
+        "BackendMetadata": {
+          "additionalProperties": false,
+          "properties": {
+            "backend": {
+              "minLength": 1,
+              "title": "Backend",
+              "type": "string"
+            },
+            "model": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Model"
+            },
+            "usage": {
+              "additionalProperties": true,
+              "title": "Usage",
+              "type": "object"
+            }
+          },
+          "required": [
+            "backend"
+          ],
+          "title": "BackendMetadata",
+          "type": "object"
+        },
+        "Claim": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            },
+            "subject": {
+              "minLength": 1,
+              "title": "Subject",
+              "type": "string"
+            },
+            "relation": {
+              "minLength": 1,
+              "title": "Relation",
+              "type": "string"
+            },
+            "object": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Object"
+            },
+            "qualifiers": {
+              "items": {
+                "$ref": "#/$defs/Qualifier"
+              },
+              "title": "Qualifiers",
+              "type": "array"
+            },
+            "text": {
+              "minLength": 1,
+              "title": "Text",
+              "type": "string"
+            },
+            "section_index": {
+              "title": "Section Index",
+              "type": "integer"
+            },
+            "sentence_index": {
+              "title": "Sentence Index",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "subject",
+            "relation",
+            "text",
+            "section_index",
+            "sentence_index"
+          ],
+          "title": "Claim",
+          "type": "object"
+        },
+        "Document": {
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "title": "Title",
+              "type": "string"
+            },
+            "sections": {
+              "items": {
+                "$ref": "#/$defs/Section"
+              },
+              "title": "Sections",
+              "type": "array"
+            }
+          },
+          "required": [
+            "title"
+          ],
+          "title": "Document",
+          "type": "object"
+        },
+        "Evidence": {
+          "additionalProperties": false,
+          "properties": {
+            "source": {
+              "enum": [
+                "sentence",
+                "title",
+                "subtitle"
+              ],
+              "title": "Source",
+              "type": "string"
+            },
+            "sentence_index": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Sentence Index"
+            }
+          },
+          "required": [
+            "source"
+          ],
+          "title": "Evidence",
+          "type": "object"
+        },
+        "Qualifier": {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "time",
+                "location",
+                "condition",
+                "negation",
+                "modality",
+                "attribution",
+                "other"
+              ],
+              "title": "Kind",
+              "type": "string"
+            },
+            "text": {
+              "minLength": 1,
+              "title": "Text",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "text"
+          ],
+          "title": "Qualifier",
+          "type": "object"
+        },
+        "Replacement": {
+          "additionalProperties": false,
+          "properties": {
+            "original": {
+              "minLength": 1,
+              "title": "Original",
+              "type": "string"
+            },
+            "replacement": {
+              "minLength": 1,
+              "title": "Replacement",
+              "type": "string"
+            },
+            "evidence": {
+              "items": {
+                "$ref": "#/$defs/Evidence"
+              },
+              "minItems": 1,
+              "title": "Evidence",
+              "type": "array"
+            }
+          },
+          "required": [
+            "original",
+            "replacement",
+            "evidence"
+          ],
+          "title": "Replacement",
+          "type": "object"
+        },
+        "ResolvedSentence": {
+          "additionalProperties": false,
+          "properties": {
+            "sentence_index": {
+              "title": "Sentence Index",
+              "type": "integer"
+            },
+            "text": {
+              "minLength": 1,
+              "title": "Text",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "resolved",
+                "unchanged",
+                "unresolved"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "replacements": {
+              "items": {
+                "$ref": "#/$defs/Replacement"
+              },
+              "title": "Replacements",
+              "type": "array"
+            }
+          },
+          "required": [
+            "sentence_index",
+            "text",
+            "status"
+          ],
+          "title": "ResolvedSentence",
+          "type": "object"
+        },
+        "Section": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            },
+            "index": {
+              "title": "Index",
+              "type": "integer"
+            },
+            "subtitle": {
+              "title": "Subtitle",
+              "type": "string"
+            },
+            "text": {
+              "title": "Text",
+              "type": "string"
+            },
+            "sentences": {
+              "items": {
+                "$ref": "#/$defs/Sentence"
+              },
+              "title": "Sentences",
+              "type": "array"
+            },
+            "excluded_spans": {
+              "items": {
+                "$ref": "#/$defs/Span"
+              },
+              "title": "Excluded Spans",
+              "type": "array"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "index",
+            "subtitle",
+            "text"
+          ],
+          "title": "Section",
+          "type": "object"
+        },
+        "Sentence": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            },
+            "index": {
+              "title": "Index",
+              "type": "integer"
+            },
+            "section_index": {
+              "title": "Section Index",
+              "type": "integer"
+            },
+            "text": {
+              "title": "Text",
+              "type": "string"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "index",
+            "section_index",
+            "text"
+          ],
+          "title": "Sentence",
+          "type": "object"
+        },
+        "SentenceResult": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            },
+            "index": {
+              "title": "Index",
+              "type": "integer"
+            },
+            "section_index": {
+              "title": "Section Index",
+              "type": "integer"
+            },
+            "text": {
+              "title": "Text",
+              "type": "string"
+            },
+            "resolution": {
+              "$ref": "#/$defs/ResolvedSentence"
+            },
+            "status": {
+              "enum": [
+                "extracted",
+                "no_claims",
+                "unresolved_ambiguity"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "claims": {
+              "items": {
+                "$ref": "#/$defs/Claim"
+              },
+              "title": "Claims",
+              "type": "array"
+            },
+            "stages": {
+              "items": {
+                "$ref": "#/$defs/StageRecord"
+              },
+              "title": "Stages",
+              "type": "array"
+            }
+          },
+          "required": [
+            "start",
+            "end",
+            "index",
+            "section_index",
+            "text",
+            "resolution",
+            "status"
+          ],
+          "title": "SentenceResult",
+          "type": "object"
+        },
+        "Span": {
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "title": "Start",
+              "type": "integer"
+            },
+            "end": {
+              "title": "End",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "title": "Span",
+          "type": "object"
+        },
+        "StageRecord": {
+          "additionalProperties": false,
+          "properties": {
+            "stage": {
+              "enum": [
+                "resolution",
+                "extraction"
+              ],
+              "title": "Stage",
+              "type": "string"
+            },
+            "output": {
+              "additionalProperties": true,
+              "title": "Output",
+              "type": "object"
+            },
+            "metadata": {
+              "$ref": "#/$defs/BackendMetadata"
+            }
+          },
+          "required": [
+            "stage",
+            "output",
+            "metadata"
+          ],
+          "title": "StageRecord",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "document": {
+          "$ref": "#/$defs/Document"
+        },
+        "sentences": {
+          "items": {
+            "$ref": "#/$defs/SentenceResult"
+          },
+          "title": "Sentences",
+          "type": "array"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "title": "Claims",
+          "type": "array"
+        },
+        "resolution_stages": {
+          "additionalProperties": {
+            "$ref": "#/$defs/StageRecord"
+          },
+          "title": "Resolution Stages",
+          "type": "object"
+        }
+      },
+      "required": [
+        "document"
+      ],
+      "title": "ExtractionResult",
+      "type": "object"
+    }
+  },
+  "exports": {
+    "data_platform.digest.claimify": [
+      "Claim",
+      "ClaimifyError",
+      "Document",
+      "ExtractionResult",
+      "Section",
+      "SentenceResult",
+      "extract_claims",
+      "parse_document"
+    ],
+    "data_platform.digest.openie": [
+      "extract_claims",
+      "parse_document",
+      "OpenIEError",
+      "ReferenceResolver",
+      "PropositionExtractor",
+      "LLMReferenceResolver",
+      "LLMPropositionExtractor",
+      "Document",
+      "Section",
+      "Sentence",
+      "BackendMetadata",
+      "Claim",
+      "Evidence",
+      "ExtractionResponse",
+      "ExtractionResult",
+      "Proposition",
+      "Qualifier",
+      "Replacement",
+      "ResolutionResponse",
+      "ResolvedSentence",
+      "SentenceResult",
+      "StageRecord"
+    ],
+    "data_platform.digest.segmenter.texttiling": [
+      "DocumentStructure",
+      "EmbeddingGenerationError",
+      "HeadingCandidate",
+      "HeadingDetectionError",
+      "HeadingGenerationError",
+      "Section",
+      "StructureBlock",
+      "detect_document_structure",
+      "generate_headings",
+      "parse_document_structure",
+      "render_markdown",
+      "resolve_embedding_model",
+      "segment_article",
+      "segment_article_semantic",
+      "segment_with_headings",
+      "texttiling_segement"
+    ]
+  },
+  "signatures": {
+    "claimify": "(markdown_doc: str, *, question: str | None = None, decision_model: str | pydantic_ai.models.Model = 'typesafe:jev-latest', generation_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', max_concurrency: int = 4) -> data_platform.digest.claimify.models.ExtractionResult",
+    "openie": "(markdown_doc: str, *, resolver: data_platform.digest.openie.backends.ReferenceResolver | None = None, extractor: data_platform.digest.openie.backends.PropositionExtractor | None = None, resolution_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', extraction_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', max_concurrency: int = 4) -> data_platform.digest.openie.models.ExtractionResult",
+    "store": "(root: str | pathlib.Path = '.data/claims', *, embedding_model: str | pydantic_ai.embeddings.base.EmbeddingModel = 'openai:text-embedding-3-small', comparison_model: str | pydantic_ai.models.Model = 'typesafe:jev-latest', max_concurrency: int = 4)",
+    "retrieve": "(self, text: str, top_k: int = 20) -> list[data_platform.digest.claim_store.RetrievalMatch]",
+    "check": "(self, records: list[data_platform.digest.claim_store.ClaimRecord], top_k: int = 20) -> data_platform.digest.claim_store.CheckReport",
+    "store_unverified": "(self, result: data_platform.digest.claimify.models.ExtractionResult, *, source: str) -> list[data_platform.digest.claim_store.ClaimRecord]",
+    "segment_article": "(text: str, *, vectorizer: Literal['counts', 'tfidf'] = 'counts', structure: data_platform.digest.segmenter.texttiling.document_structure.DocumentStructure | None = None) -> list[data_platform.digest.segmenter.texttiling.models.Section]",
+    "texttiling_segement": "(markdown_doc: str, *, model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', embedding_model: str | pydantic_ai.embeddings.base.EmbeddingModel | None = None, max_concurrency: int = 4, local_files_only: bool = False, local_model_path: str | None = None, decision_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna') -> str"
+  }
+}

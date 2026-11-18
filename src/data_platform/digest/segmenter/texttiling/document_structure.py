@@ -6,8 +6,9 @@ from typing import Literal
 
 from markdown_it import MarkdownIt
 
-from .quotations import quotation_spans
-from .sentences import sentence_spans
+from ..._text.markdown import line_offsets
+from ..._text.quotations import quotation_spans
+from ..._text.sentences import sentence_spans
 
 _METADATA = re.compile(
     r"^(?:published(?:\s+date|\s+on)?|publication date|date|ngày đăng(?: bài)?|"
@@ -64,9 +65,7 @@ def parse_document_structure(text: str) -> DocumentStructure:
     Markdown token line maps keep exclusions and offsets tied to source text.
     """
     lines = text.splitlines(keepends=True)
-    offsets = [0]
-    for line in lines:
-        offsets.append(offsets[-1] + len(line))
+    offsets = line_offsets(text)
     tokens = MarkdownIt("commonmark").parse(text)
     blocks = []
     top_blocks = []

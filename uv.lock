@@ -624,6 +624,7 @@ dependencies = [
     { name = "numpy" },
     { name = "pydantic" },
     { name = "pydantic-ai", extra = ["typesafe"] },
+    { name = "python-dotenv" },
     { name = "requests" },
     { name = "tiktoken" },
 ]
@@ -643,6 +644,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.0" },
     { name = "pydantic", specifier = ">=2.14.3" },
     { name = "pydantic-ai", extras = ["typesafe"], specifier = ">=2.68.0" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "scikit-learn", marker = "extra == 'offline'", specifier = ">=1.7" },
     { name = "sentence-transformers", marker = "extra == 'offline'", specifier = ">=5.0" },

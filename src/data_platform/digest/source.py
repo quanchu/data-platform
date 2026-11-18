@@ -1,8 +1,14 @@
 """Shared source-aligned document records and Markdown parsing."""
-from markdown_it import MarkdownIt
-from pydantic import BaseModel, ConfigDict, Field
 
-from .segmenter.texttiling.sentences import sentence_spans
+from typing import Annotated
+
+from markdown_it import MarkdownIt
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+
+from ._text.markdown import line_offsets
+from ._text.sentences import sentence_spans
+
+Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 
 class Record(BaseModel):
@@ -36,10 +42,7 @@ class Document(Record):
 def parse_document(source: str) -> Document:
     if not source.strip():
         return Document(title="")
-    lines = source.splitlines(keepends=True)
-    offsets = [0]
-    for line in lines:
-        offsets.append(offsets[-1] + len(line))
+    offsets = line_offsets(source)
     tokens = MarkdownIt("commonmark").enable("table").parse(source)
     headings = []
     for i, token in enumerate(tokens):
@@ -52,32 +55,55 @@ def parse_document(source: str) -> Document:
     subtitles = [(t, s) for t, s in headings if t.tag == "h2"]
     if not subtitles or any(not s for _, s in subtitles):
         raise ValueError("Document requires nonempty H2 section subtitles")
-    if source[:offsets[title.map[0]]].strip() or subtitles[0][0].map[0] < title.map[1]:
+    if source[: offsets[title.map[0]]].strip() or subtitles[0][0].map[0] < title.map[1]:
         raise ValueError("H1 must precede all section content")
-    if source[offsets[title.map[1]]:offsets[subtitles[0][0].map[0]]].strip():
+    if source[offsets[title.map[1]] : offsets[subtitles[0][0].map[0]]].strip():
         raise ValueError("Body content must be beneath an H2 subtitle")
     sections = []
     sentence_index = 0
     for index, (heading, subtitle) in enumerate(subtitles):
         start = offsets[heading.map[1]]
-        end = offsets[subtitles[index + 1][0].map[0]] if index + 1 < len(subtitles) else len(source)
-        section = Section(index=index, subtitle=subtitle, start=start, end=end, text=source[start:end])
+        end = (
+            offsets[subtitles[index + 1][0].map[0]]
+            if index + 1 < len(subtitles)
+            else len(source)
+        )
+        section = Section(
+            index=index, subtitle=subtitle, start=start, end=end, text=source[start:end]
+        )
         excluded = []
         for token in tokens:
             if token.map is None:
                 continue
             a, b = (offsets[n] for n in token.map)
-            if start <= a < end and token.type in {"fence", "code_block", "html_block", "table_open"}:
+            if start <= a < end and token.type in {
+                "fence",
+                "code_block",
+                "html_block",
+                "table_open",
+            }:
                 excluded.append(Span(start=a, end=b))
         section.excluded_spans = excluded
         for i, token in enumerate(tokens):
-            if token.type != "inline" or token.map is None or tokens[i - 1].type != "paragraph_open":
+            if (
+                token.type != "inline"
+                or token.map is None
+                or tokens[i - 1].type != "paragraph_open"
+            ):
                 continue
             a, b = (offsets[n] for n in token.map)
             if not start <= a < end or any(s.start <= a < s.end for s in excluded):
                 continue
             for left, right in sentence_spans(source, a, b):
-                section.sentences.append(Sentence(index=sentence_index, section_index=index, start=left, end=right, text=source[left:right]))
+                section.sentences.append(
+                    Sentence(
+                        index=sentence_index,
+                        section_index=index,
+                        start=left,
+                        end=right,
+                        text=source[left:right],
+                    )
+                )
                 sentence_index += 1
         sections.append(section)
     return Document(title=title_text, sections=sections)

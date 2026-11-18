@@ -1,11 +1,45 @@
-# GLiNER tagging — placeholder
+# GLiNER entity tagging
 
-This directory reserves a place for entity tagging and light fine-tuning.
-`tagger.py`, `light_finetune.py`, and `__init__.py` are currently empty.
+Extract source-aligned entity mentions with a caller-loaded GLiNER model. The
+package contains the chunking and selection logic used by
+[the notebook](../../../../notebooks/gliner_entity_tagging.ipynb).
 
-There is no implemented tagging API, training workflow, model configuration, or
-method-specific test suite. Although `gliner` appears in the project dependencies,
-installing the project does not provide a runnable tagging method here.
+```python
+from gliner import GLiNER
+from data_platform.digest.gliner import extract_entities
 
-For implemented processing methods, see the
-[project method index](../../../../README.md#processing-methods).
+model = GLiNER.from_pretrained("urchade/gliner_multi-v2.1", local_files_only=True)
+model.to("cpu")
+model.eval()
+entities = extract_entities(
+    markdown_doc,
+    model=model,
+    labels=["company name", "date", "email", "person name"],
+    threshold=0.5,
+    chunk_words=200,
+    chunk_overlap=40,
+)
+```
+
+The example requires cached weights. The caller controls loading, device, and
+whether downloads are allowed. Importing this package loads neither GLiNER nor
+PyTorch and never downloads a model. Inference is synchronous and runs under
+`torch.inference_mode()`; offload it yourself when using an async application.
+
+Chunks use the supplied model's word splitter and maximum length. Exact duplicate
+predictions retain their highest score. Overlapping predictions retain the
+higher-scoring span; ties use source order. Output is an ordered list of dictionaries
+with `text`, `label`, `score`, `start`, and `end`. Offsets are half-open Python
+character indices into the unchanged source. Empty input returns an empty list.
+Scores and selected mentions require human review.
+
+The notebook owns model loading, previews, and JSON/CSV/HTML exports. The library
+neither reads input files nor writes exports. `light_finetune.py` remains a
+placeholder; no training workflow is implemented.
+
+```sh
+uv run python -m unittest discover -s tests -p 'test_gliner.py' -v
+```
+
+Tests use a fake model and cover chunk boundaries, Unicode offsets, deduplication,
+overlap selection, empty inputs, and notebook exports without downloading weights.

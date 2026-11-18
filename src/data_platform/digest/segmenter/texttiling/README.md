@@ -1,96 +1,206 @@
-# TextTiling segmentation and heading generation
+# TextTiling segmentation and headings
 
-Split article text into source-aligned sections using lexical similarity or
-sentence embeddings. Structure detection and heading generation are separate
-steps that can be combined with the convenience pipeline.
-
-## Setup and segmentation methods
-
-Run `uv sync` from the repository root. Install optional TF-IDF/local-embedding
-dependencies with `uv sync --extra offline`.
+Segmentation and heading generation are independent. In a notebook:
 
 ```python
 from data_platform.digest.segmenter.texttiling import (
-    segment_article, segment_article_semantic,
+    detect_document_structure,
+    segment_article_semantic,
+    generate_headings,
+    render_markdown,
 )
 
-text = "Acme builds cars.\n\nAcme also makes batteries."
-lexical = segment_article(text)  # local token counts; no credentials
-weighted = segment_article(text, vectorizer="tfidf")  # optional scikit-learn
-semantic = await segment_article_semantic(text)  # sentence embeddings
+structure = await detect_document_structure(markdown_doc)
+sections = await segment_article_semantic(markdown_doc, structure=structure)
+headed = await generate_headings(sections, article_text=markdown_doc, max_concurrency=4)
+segmented_doc = render_markdown(headed)
 ```
 
-Counts and TF-IDF compare lexical windows; semantic segmentation compares sentence
-embedding windows. Boundaries follow paragraphs, existing structure, and quotations.
-Prose sections have a four-paragraph cap; paragraphs and quotation sections have no
-size cap. English/Vietnamese sentence and quotation handling is heuristic.
+Open [the notebook](../../../../../notebooks/article_segmentation.ipynb) for article loading, section inspection,
+backend comparisons, headings, display, and saving. In scripts use `asyncio.run`.
 
-With `embedding_model=None`, semantic segmentation selects
-`openai:text-embedding-3-small` if `OPENAI_API_KEY` is nonblank, otherwise
-`sentence-transformers:intfloat/multilingual-e5-small`. Explicit model identifiers
-or configured Pydantic AI embedding models override selection. Local weights may
-download on first use; `local_files_only=True` requires prepared weights, and
-`local_model_path` can identify them. Provider errors do not trigger a silent local
-fallback. `resolve_embedding_model()` reports selection without loading weights.
+### Document titles and existing headings
 
-## Structure, headings, and Markdown
+`detect_document_structure(markdown_doc, decision_model="openai:gpt-6-luna")`
+recognizes explicit Markdown structure locally, then classifies rule-filtered
+unformatted heading candidates with a Pydantic-validated `is_heading: StrictBool`
+response. It accepts configured model instances and `max_concurrency=4`, with two
+output-validation retries. A candidate is a standalone, single-line paragraph
+containing at most one sentence, up to 40 lexical tokens and 240 characters;
+short labels without punctuation are allowed. Metadata, bylines, lists, quotations,
+code, and standalone URLs are excluded. Capitalization alone does not confirm a
+heading. The classifier sees the document title and neighboring paragraphs.
 
-```python
-from data_platform.digest.segmenter.texttiling import (
-    detect_document_structure, generate_headings, render_markdown,
-)
+Without an OpenAI key, explicit Markdown headings and metadata still work;
+unformatted candidates remain unchanged and `classification_skipped` is true.
+An attempted classifier failure raises `HeadingDetectionError.candidate_index`
+with the original cause. Configured model instances use their own credentials.
+Use `parse_document_structure` for the local-only pass.
 
-structure = await detect_document_structure(text)
-sections = await segment_article_semantic(text, structure=structure)
-headed = await generate_headings(sections, article_text=text, max_concurrency=4)
-markdown_doc = render_markdown(headed)
-```
+The returned `DocumentStructure` contains source-aligned `blocks` and `candidates`;
+candidates expose `is_heading` as true, false, or `None` when unclassified. Pass
+`structure=structure` to either segmentation API to reuse these decisions. Without
+precomputed structure, segmenters only perform the local pass: they make no hidden
+heading-classification calls. A structure from different source text is rejected.
 
-`detect_document_structure` parses explicit Markdown locally and classifies eligible
-unformatted heading candidates with a model (`decision_model="openai:gpt-6-luna"`).
-Without an OpenAI key, unformatted classification is skipped. Use
-`parse_document_structure` for a local-only pass. Segmentation without supplied
-structure parses locally and does not make hidden heading-classification calls.
+The first H1 is the document title. Additional H1s become H2s; existing H2–H6
+headings retain their levels. If no H1 exists, a confirmed heading at the beginning
+of the document becomes the H1 title. The title and adjacent publication metadata
+are emitted before generated subtitles. Unformatted section headings become H2s
+without changing their wording. Heading detection is heuristic plus model judgment;
+review the candidate decisions shown in the notebook when accuracy matters.
 
-Heading generation defaults to `model="openai:gpt-6-luna"`, accepts configured model
-instances, and uses article context to resolve references. Local embeddings do not
-provide a local heading model. Structural headings are retained; generated headings
-use the source language and preserve attribution and planned/completed status.
-Semantic heading requirements are prompt-driven and need review.
+Structural sections use `kind="title"`, `"metadata"`, or `"heading"`, with
+`heading_level` and `heading_is_markdown` metadata. Their `text` and source offsets
+remain unchanged; heading normalization happens only in `render_markdown`.
+Structural blocks are excluded from embeddings and paragraph caps, and act as
+mandatory section boundaries. Heading generation skips structural blocks and the
+first content section following each existing heading, preventing duplicate
+subtitles. Later subdivisions can receive generated H2 headings. An article's
+existing title is never given a generated heading above it.
 
-`segment_with_headings(text, ...)` combines detection, semantic segmentation, and
-heading generation, returning sections. `texttiling_segement(text, ...)` (existing
-API spelling) additionally renders Markdown. Both accept `model`, `decision_model`,
-`embedding_model`, `local_files_only`, `local_model_path`, and `max_concurrency`.
-Use `await` in Jupyter or wrap async calls in `asyncio.run` for scripts.
+### Automatic embedding selection
 
-## Output and limitations
+With `embedding_model=None`, semantic segmentation uses
+`openai:text-embedding-3-small` when `OPENAI_API_KEY` is nonblank; otherwise it tries
+`sentence-transformers:intfloat/multilingual-e5-small` locally. Explicit model
+names or configured Pydantic AI `EmbeddingModel` instances override selection.
+`resolve_embedding_model()` reports the selection without loading a model;
+actual embedding selection is also logged at INFO level.
 
-Sections are immutable records with `text`, `start`, `end`, `kind`, optional
-`heading`, `heading_level`, and `heading_is_markdown`. Offsets are half-open Python
-character indices. For nonblank input, concatenating section text reconstructs the
-original input. Blank input returns no sections. Kinds include prose, quote, title,
-metadata, and heading. Attributed quotations stay intact and are excluded from
-similarity fitting; unrelated narration remains separate.
+The library reads process credentials. The example notebook loads `.env` first.
+Authentication, quota, timeout, or other OpenAI errors do not cause a silent local
+fallback. `EmbeddingGenerationError` reports the zero-based batch/sentence index
+and preserves the cause. No partial segmentation is returned.
 
-Rendering inserts headings and normalizes heading structure; do not treat rendered
-Markdown offsets as offsets into the original input. It does not invent a missing
-article title: downstream claim extraction still requires a valid H1/H2 document.
-`HeadingDetectionError`, `EmbeddingGenerationError`, and `HeadingGenerationError`
-retain contextual indices and original causes. Failed async heading work cancels
-and awaits remaining workers. No automatic file persistence occurs.
-
-## Verification
-
-From the repository root:
+Install the offline alternatives with:
 
 ```sh
-uv run python -m unittest discover -s tests -p 'test_texttiling_segmenter.py' -v
-uv run python -m unittest discover -s tests -p 'test_semantic_segmenter.py' -v
-uv run python -m unittest discover -s tests -p 'test_document_structure.py' -v
-uv run python -m unittest discover -s tests -p 'test_quotations.py' -v
+uv sync --extra offline
 ```
 
-These use offline fixtures by default. See
-[the notebook](../../../../../notebooks/article_segmentation.ipynb) and
-[LLM segmentation](../llm_e2e/README.md) for the alternative approach.
+Local E5 runs on CPU with normalized vectors and batches of 32. Its weights are
+cached and may download on first use; loaded models are reused. For prepared
+weights only, use:
+
+```python
+sections = await segment_article_semantic(
+    markdown_doc,
+    embedding_model="sentence-transformers:intfloat/multilingual-e5-small",
+    local_files_only=True,
+    # local_model_path="/path/to/prepared/e5-model",  # optional
+)
+```
+
+The local model uses the E5 `query: ` prefix for symmetric similarity. Token budgets
+include that prefix and special tokens. Missing dependencies or weights produce
+an actionable error. Local embedding fallback does **not** provide a local heading
+model: the default heading generator still requires an OpenAI key. The notebook
+skips heading generation without that key and can still display/save the sections.
+
+### Offline lexical alternatives
+
+```python
+from data_platform.digest.segmenter.texttiling import segment_article
+
+sections = segment_article(markdown_doc)  # existing count-based TextTiling
+sections = segment_article(markdown_doc, vectorizer="tfidf")
+```
+
+Counts remain the compatibility default. TF-IDF uses scikit-learn word unigrams
+and bigrams, sublinear term frequency, smoothed IDF, and L2 normalization. Weights
+are fitted across article prose blocks and reused for adjacent comparison windows.
+Diacritics are preserved, with no English-only stopword list. TF-IDF is a lexical
+alternative, not a learned semantic representation.
+
+### Boundaries and source preservation
+
+Both segmentation APIs return immutable `Section` records with `text`, `start`,
+`end`, `kind` (`prose`, `quote`, `title`, `metadata`, or `heading`), and optional `heading`. Offsets are Python
+character indices, with an exclusive end. Concatenating section text reconstructs
+nonblank input exactly. Blank input returns `[]`.
+
+Blank lines separate paragraphs. Every independently attributed quotation gets its
+own `quote` section, even when the same person speaks again or multiple quotations
+occur in one paragraph. Adjacent reporting clauses, including speaker names and
+titles, stay with their quotation. An utterance interrupted only by attribution,
+such as `“We will invest,” she said, “next year.”`, remains one quotation. Separate
+completed utterances never merge just because the speaker or topic is the same.
+
+The shared deterministic detector supports common English/Vietnamese reporting
+clauses, straight/curly quotation marks, guillemets, nested quotations, standalone
+quotes, and Markdown blockquotes. Multi-paragraph quotations remain intact.
+Ordinary inline quoted terms, code, and unmatched delimiters remain prose;
+unrelated surrounding narration is kept outside the quote sections. Detection is
+heuristic rather than a full grammatical or speaker-identity parser.
+
+Attributed quotations are excluded from heading candidates, embeddings, and TF-IDF
+vocabulary fitting. Comparison windows never cross quotes. Titles and existing
+headings remain higher-priority structural boundaries. Prose fragments retain their
+original paragraph boundaries for the four-paragraph cap. Source slices and offsets
+remain exact; rendering adds blank lines where necessary for generated H2 headings
+between sections originally occurring within one paragraph.
+Paragraphs and quote sections have no size cap. Prose sections contain at most
+four paragraphs, after topic boundaries have been selected.
+
+Lexical TextTiling uses 20-token blocks and up to four blocks per neighboring
+window. Semantic TextTiling uses sentence embeddings and windows of up to three
+sentences on each side. Both use cosine similarity, three-gap smoothing, depth
+peaks, and paragraph-aligned boundaries. Sentence splitting is heuristic, protecting
+common English/Vietnamese abbreviations, initials, decimals, and URLs; it is not a
+full language parser. Neither method guarantees ideal topic boundaries.
+
+OpenAI embedding batches contain at most 64 inputs and 64,000 tokens. Oversized
+sentences are split at Unicode-safe character boundaries within model token
+budgets, then combined by token-weighted vector averaging. Text is never silently
+truncated. Blank input, quote-only input, and single-paragraph prose runs require
+no embeddings or local model loading.
+
+### Heading rules and parallel requests
+
+`generate_headings` accepts existing sections without rerunning segmentation.
+Pass `article_text` to provide complete context, especially when passing a subset
+of sections; by default it reconstructs context from the supplied sections.
+The default heading model is `openai:gpt-6-luna`; `model` also accepts configured
+Pydantic AI models.
+
+Headings are instructed to use the article's language and a complete sentence with
+an explicit subject, verb, and object. Ordinary headings summarize the first
+substantive claim and preserve completed/planned/expected status. Quote headings
+name the explicitly attributed speaker and paraphrase the first claim in neutral
+indirect speech. Entity names replace pronouns; named people retain honorifics and
+full titles supplied in the article. Missing details are never invented. Unnamed
+speakers are described as unnamed. Structural metadata sections do not receive
+generated headings. Context resolves references rather than replacing the target claim.
+
+Structured output validates nonempty, single-line headings with two output retries.
+Grammar and factual rules are prompt requirements and need review; they are not
+mechanically guaranteed. `max_concurrency=4` bounds simultaneous section requests;
+use one for sequential generation. Results preserve input order and inputs are
+not mutated. On failure, remaining workers are cancelled and awaited;
+`HeadingGenerationError.section_index` identifies the failed section and its cause.
+Caller cancellation propagates. Empty inputs make no model requests.
+
+`render_markdown` inserts escaped `##` headings without model requests; unheaded
+sections remain unchanged. `segment_with_headings` and `texttiling_segement` remain
+convenience wrappers, but now perform semantic embedding requests before heading
+requests. Both detect document structure first, accept `decision_model`, and forward
+`embedding_model`, `local_files_only`, `local_model_path`, and `max_concurrency`,
+while supplying full article context. The `model` argument still
+selects the heading model.
+
+### Verification
+
+The default test suite uses deterministic embedding and heading fixtures. Optional
+live checks on both article fixtures:
+
+```sh
+RUN_LIVE_HEADINGS=1 uv run python -m unittest discover -s tests -p 'test_texttiling_segmenter.py' -v
+RUN_LOCAL_EMBEDDINGS=1 uv run --extra offline python -m unittest discover -s tests -p 'test_semantic_segmenter.py' -v
+```
+
+Configure credentials in the process environment for hosted checks. Set
+`HEADING_MODEL` to override the live heading model. Set `LOCAL_FILES_ONLY=1` for
+the local smoke test to require cached weights. Live tests report boundaries and
+headings for review rather than asserting a fixed section count. No crawler
+integration is added.

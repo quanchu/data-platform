@@ -1,6 +1,5 @@
 """Concurrent, article-grounded headings for independently segmented sections."""
 
-import asyncio
 import json
 from collections.abc import Sequence
 from dataclasses import replace
@@ -9,6 +8,7 @@ from pydantic import BaseModel, field_validator
 from pydantic_ai import Agent
 from pydantic_ai.models import Model
 
+from ..._async import ordered_map, positive_int
 from .models import Section
 
 DEFAULT_MODEL = "openai:gpt-6-luna"
@@ -70,12 +70,7 @@ async def generate_headings(
     Context defaults to all supplied sections; pass article_text for subsets.
     On failure, cancel and await remaining workers, preserving the failing index.
     """
-    if (
-        isinstance(max_concurrency, bool)
-        or not isinstance(max_concurrency, int)
-        or max_concurrency < 1
-    ):
-        raise ValueError("max_concurrency must be a positive integer")
+    positive_int(max_concurrency, "max_concurrency")
     if not sections:
         return []
     sections = tuple(sections)
@@ -109,37 +104,26 @@ async def generate_headings(
     except Exception as exc:
         raise HeadingGenerationError(eligible[0][0]) from exc
     results = list(sections)
-    pending = iter(eligible)
 
-    async def worker():
-        for index, section in pending:
-            try:
-                response = await agent.run(
-                    json.dumps(
-                        {
-                            "article_context": context,
-                            "target_section": {
-                                "index": index,
-                                "kind": section.kind,
-                                "text": section.text,
-                            },
+    async def process(item):
+        index, section = item
+        try:
+            response = await agent.run(
+                json.dumps(
+                    {
+                        "article_context": context,
+                        "target_section": {
+                            "index": index,
+                            "kind": section.kind,
+                            "text": section.text,
                         },
-                        ensure_ascii=False,
-                    )
+                    },
+                    ensure_ascii=False,
                 )
-                results[index] = replace(section, heading=response.output.heading)
-            except Exception as exc:
-                raise HeadingGenerationError(index) from exc
+            )
+            results[index] = replace(section, heading=response.output.heading)
+        except Exception as exc:
+            raise HeadingGenerationError(index) from exc
 
-    tasks = [
-        asyncio.create_task(worker())
-        for _ in range(min(max_concurrency, len(eligible)))
-    ]
-    try:
-        await asyncio.gather(*tasks)
-    except BaseException:
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        raise
+    await ordered_map(process, eligible, max_concurrency=max_concurrency)
     return results

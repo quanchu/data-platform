@@ -8,14 +8,14 @@ from functools import lru_cache
 from threading import Lock
 from typing import TYPE_CHECKING
 
+from ..._text.quotations import body_spans, prose_paragraphs
+from ..._text.sentences import sentence_spans as _sentences
 from .document_structure import (
     DocumentStructure,
     document_parts,
     parse_document_structure,
 )
 from .models import Section
-from .quotations import body_spans, prose_paragraphs
-from .sentences import sentence_spans as _sentences
 from .texttiling_segmenter import _segment, _select_boundaries
 
 if TYPE_CHECKING:

@@ -48,6 +48,8 @@ Pass `embedding_model` (a string or Pydantic AI `EmbeddingModel`) and
 `comparison_model` (a string or Pydantic AI `Model`) to inject alternatives.
 Injected embedding models must expose distinct provider/model identifiers when
 vector semantics change. Comparisons run with `max_concurrency=4` by default.
+If a comparison fails or the caller cancels a check, outstanding comparison
+workers are cancelled and awaited before the error propagates.
 
 Results include full source records and cosine similarities. The typed verdicts
 are `conflict`, `equivalent`, `compatible`, `unrelated`, and `uncertain`.

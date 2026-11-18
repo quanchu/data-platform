@@ -1,6 +1,5 @@
 """Bounded, type-safe decisions for rule-filtered unformatted headings."""
 
-import asyncio
 import json
 import logging
 import os
@@ -10,6 +9,7 @@ from pydantic import BaseModel, StrictBool
 from pydantic_ai import Agent
 from pydantic_ai.models import Model
 
+from ..._async import ordered_map, positive_int
 from .document_structure import (
     DocumentStructure,
     confirm_candidates,
@@ -56,12 +56,7 @@ async def detect_document_structure(
     Configured model instances use their own credentials. An attempted request
     failure is surfaced, never treated as a negative classification.
     """
-    if (
-        isinstance(max_concurrency, bool)
-        or not isinstance(max_concurrency, int)
-        or max_concurrency < 1
-    ):
-        raise ValueError("max_concurrency must be a positive integer")
+    positive_int(max_concurrency, "max_concurrency")
     structure = parse_document_structure(text)
     if not structure.candidates:
         return structure
@@ -87,35 +82,26 @@ async def detect_document_structure(
         (text[b.start : b.end] for b in structure.blocks if b.kind == "title"), ""
     )
     decisions = [False] * len(structure.candidates)
-    pending = iter(enumerate(structure.candidates))
 
-    async def worker():
-        for index, candidate in pending:
-            try:
-                response = await agent.run(
-                    json.dumps(
-                        {
-                            "document_title": title,
-                            "candidate": candidate.text,
-                            "previous_paragraph": candidate.previous_paragraph,
-                            "next_paragraph": candidate.next_paragraph,
-                        },
-                        ensure_ascii=False,
-                    )
+    async def process(item):
+        index, candidate = item
+        try:
+            response = await agent.run(
+                json.dumps(
+                    {
+                        "document_title": title,
+                        "candidate": candidate.text,
+                        "previous_paragraph": candidate.previous_paragraph,
+                        "next_paragraph": candidate.next_paragraph,
+                    },
+                    ensure_ascii=False,
                 )
-                decisions[index] = response.output.is_heading
-            except Exception as exc:
-                raise HeadingDetectionError(index) from exc
+            )
+            decisions[index] = response.output.is_heading
+        except Exception as exc:
+            raise HeadingDetectionError(index) from exc
 
-    tasks = [
-        asyncio.create_task(worker())
-        for _ in range(min(max_concurrency, len(decisions)))
-    ]
-    try:
-        await asyncio.gather(*tasks)
-    except BaseException:
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        raise
+    await ordered_map(
+        process, enumerate(structure.candidates), max_concurrency=max_concurrency
+    )
     return confirm_candidates(structure, decisions)
