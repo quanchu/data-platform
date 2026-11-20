@@ -128,6 +128,7 @@ class TaggingTests(unittest.TestCase):
         )
         with (
             tempfile.TemporaryDirectory() as directory,
+            patch.object(sys, "path", [str(root / "notebooks"), *sys.path]),
             patch.dict(
                 sys.modules, {"gliner": types.SimpleNamespace(GLiNER=FakeModel)}
             ),
@@ -138,10 +139,17 @@ class TaggingTests(unittest.TestCase):
                     if cell["cell_type"] != "code":
                         continue
                     source = "".join(cell["source"])
-                    if source.startswith("output_dir.mkdir"):
-                        namespace["output_dir"] = Path(directory)
                     exec(compile(source, "<gliner notebook>", "exec"), namespace)
-            exports = list(Path(directory).glob("*.entities.json"))
+                    if "input_paths =" in source:
+                        namespace["run_live"] = True
+                        namespace["project_root"] = Path(directory)
+                    if "save_output = False" in source:
+                        # Run the export branch without changing the notebook's safe default.
+                        exec(
+                            source.replace("save_output = False", "save_output = True"),
+                            namespace,
+                        )
+            exports = list((Path(directory) / ".data/gliner").glob("*.entities.json"))
             self.assertEqual(len(exports), len(namespace["input_paths"]))
             for path in exports:
                 data = json.loads(path.read_text())

@@ -62,3 +62,8 @@ uv run python -m unittest discover -s tests -p 'test_llm_e2e.py' -v
 Tests use deterministic model fixtures. See
 [the notebook](../../../../../notebooks/llm_e2e_segmentation.ipynb) for intermediate
 inspection and optional saving.
+
+Complete Markdown lists, including continuation paragraphs and nested quotations,
+are protected input blocks. Internal blank lines do not create separate heading
+slots. A preceding colon-ended introduction remains attached. Model instructions
+live in `prompts.py`; `pipeline.INSTRUCTIONS` remains available for compatibility.

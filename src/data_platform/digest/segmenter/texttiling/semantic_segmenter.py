@@ -1,6 +1,5 @@
 """Sentence-embedding TextTiling with automatic hosted/local backend selection."""
 
-import asyncio
 import logging
 import math
 import os
@@ -8,6 +7,8 @@ from functools import lru_cache
 from threading import Lock
 from typing import TYPE_CHECKING
 
+from ..._events import emit
+from ..._async import run_blocking
 from ..._text.quotations import body_spans, prose_paragraphs
 from ..._text.sentences import sentence_spans as _sentences
 from .document_structure import (
@@ -25,6 +26,10 @@ OPENAI_EMBEDDING_MODEL = "openai:text-embedding-3-small"
 LOCAL_EMBEDDING_MODEL = "sentence-transformers:intfloat/multilingual-e5-small"
 _LOG = logging.getLogger(__name__)
 _LOAD_LOCK = Lock()
+_MAX_INPUT_TOKENS = 8000
+_MAX_BATCH_ITEMS = 64
+_MAX_BATCH_TOKENS = 64000
+_CONTEXT_SENTENCES = 3
 
 
 class EmbeddingGenerationError(RuntimeError):
@@ -84,7 +89,7 @@ def _cached_local_model(name: str, local_files_only: bool, use_e5_prefix: bool):
                     )["input_ids"]
                 )
 
-            return await asyncio.to_thread(count)
+            return await run_blocking(count)
 
     return UntruncatedEmbeddingModel(
         encoder,
@@ -108,7 +113,7 @@ async def _make_embedder(selected, local_files_only, local_model_path):
     if isinstance(selected, str) and selected.startswith("sentence-transformers:"):
         use_e5_prefix = "multilingual-e5" in selected
         name = local_model_path or selected.split(":", 1)[1]
-        selected = await asyncio.to_thread(
+        selected = await run_blocking(
             _load_local_model, str(name), local_files_only, use_e5_prefix
         )
         prefix = "query: " if use_e5_prefix else ""
@@ -149,6 +154,27 @@ async def _chunks(text, count_tokens, limit, prefix=""):
             yield chunk, max(1, await count_tokens(prefix + chunk))
 
 
+def _embedding_batches(pieces):
+    """Bound both item count and total tokens without dropping sentence weights."""
+    batch = []
+    token_count = 0
+    for piece in pieces:
+        if batch and (
+            len(batch) >= _MAX_BATCH_ITEMS or token_count + piece[2] > _MAX_BATCH_TOKENS
+        ):
+            yield batch
+            batch, token_count = [], 0
+        batch.append(piece)
+        token_count += piece[2]
+    if batch:
+        yield batch
+
+
+def _mean_vector(window):
+    values = [sum(column) / len(window) for column in zip(*window, strict=True)]
+    return _normalize(values) if any(values) else values
+
+
 async def _embed_sentences(
     text, sentences, selected, local_files_only, local_model_path
 ):
@@ -157,7 +183,9 @@ async def _embed_sentences(
         embedder, prefix = await _make_embedder(
             selected, local_files_only, local_model_path
         )
-        limit = min(8000, await embedder.max_input_tokens() or 8000)
+        limit = min(
+            _MAX_INPUT_TOKENS, await embedder.max_input_tokens() or _MAX_INPUT_TOKENS
+        )
         pieces = []
         for sentence_index, (start, end) in enumerate(sentences):
             async for chunk, tokens in _chunks(
@@ -166,18 +194,15 @@ async def _embed_sentences(
                 pieces.append((sentence_index, chunk, tokens))
         sums = [None] * len(sentences)
         dimension = None
-        cursor = 0
-        while cursor < len(pieces):
-            batch = []
-            total = 0
-            while cursor < len(pieces) and len(batch) < 64:
-                item = pieces[cursor]
-                if batch and total + item[2] > 64000:
-                    break
-                batch.append(item)
-                total += item[2]
-                cursor += 1
+        for batch in _embedding_batches(pieces):
             sentence_index = batch[0][0]
+            batch_spans = [sentences[index] for index, _, _ in batch]
+            emit(
+                "embedding_batch",
+                status="running",
+                spans=batch_spans,
+                batch_index=batch_index,
+            )
             response = await embedder.embed(
                 [item[1] for item in batch], input_type="query"
             )
@@ -196,6 +221,12 @@ async def _embed_sentences(
                     sums[index] = [0.0] * dimension
                 for j, value in enumerate(vector):
                     sums[index][j] += weight * value
+            emit(
+                "embedding_batch",
+                spans=batch_spans,
+                batch_index=batch_index,
+                dimensions=dimension,
+            )
             batch_index += 1
         return [_normalize(vector) for vector in sums]
     except Exception as exc:
@@ -205,13 +236,8 @@ async def _embed_sentences(
 def _semantic_boundaries(vectors, sentences, paragraphs):
     scores = []
     for gap in range(1, len(vectors)):
-
-        def mean(window):
-            values = [sum(column) / len(window) for column in zip(*window, strict=True)]
-            return _normalize(values) if any(values) else values
-
-        left = mean(vectors[max(0, gap - 3) : gap])
-        right = mean(vectors[gap : gap + 3])
+        left = _mean_vector(vectors[max(0, gap - _CONTEXT_SENTENCES) : gap])
+        right = _mean_vector(vectors[gap : gap + _CONTEXT_SENTENCES])
         scores.append(sum(a * b for a, b in zip(left, right, strict=True)))
     return _select_boundaries(scores, [start for start, _ in sentences[1:]], paragraphs)
 

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Digest Lab · Live processing
+  </title>
+  <link href="/static/style.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <header>
+   <div class="brand">
+    <span class="logo">
+     d.
+    </span>
+    <div>
+     DATA PLATFORM
+     <span class="subbrand">
+      PROCESSING LAB
+     </span>
+    </div>
+   </div>
+   <div class="header-note">
+    <span class="dot">
+    </span>
+    Local live workspace
+    <span id="readiness">
+    </span>
+   </div>
+  </header>
+  <main>
+   <section class="intro">
+    <div>
+     <div class="eyebrow">
+      FROM SOURCE TO STRUCTURE
+     </div>
+     <h1>
+      See the reasoning.
+      <br/>
+      <span>
+       Follow the evidence.
+      </span>
+     </h1>
+     <p>
+      Run a processing task and follow each step back to the original article.
+     </p>
+    </div>
+    <div class="intro-aside">
+     <span class="number">
+      01—05
+     </span>
+     <span>
+      Five workflows.
+      <br/>
+      One source of truth.
+     </span>
+    </div>
+   </section>
+   <nav aria-label="Processing tasks" id="tabs">
+   </nav>
+   <section class="toolbar">
+    <div class="input-tools">
+     <label>
+      .data Markdown
+      <select id="example">
+      </select>
+     </label>
+     <button id="refresh-documents">Refresh files</button>
+     <label class="file-button">
+      Open Markdown
+      <input accept=".md,.txt,text/plain,text/markdown" id="file" type="file"/>
+     </label>
+     <button id="edit">
+      Edit source
+     </button>
+    </div>
+    <div>
+     <button disabled="" id="cancel">
+      Stop task
+     </button>
+     <button class="primary" id="run">
+      Run segmentation
+      <span>
+       ↗
+      </span>
+     </button>
+    </div>
+   </section>
+   <section hidden="" id="editor-panel">
+    <label for="editor">
+     Markdown source
+    </label>
+    <textarea id="editor" spellcheck="false"></textarea>
+    <button class="primary" id="apply">
+     Use this source
+    </button>
+   </section>
+   <details class="settings">
+    <summary>
+     Task settings
+     <span id="settings-hint">
+      Lexical segmentation · no model required
+     </span>
+    </summary>
+    <div class="settings-grid">
+     <label data-tasks="segmentation">
+      Method
+      <select id="method">
+       <option value="counts">
+        Lexical counts · offline
+       </option>
+       <option value="tfidf">
+        TF-IDF · offline extra
+       </option>
+       <option selected="" value="semantic">
+        Semantic embeddings
+       </option>
+       <option value="llm">
+        End-to-end LLM
+       </option>
+      </select>
+     </label>
+     <label class="check" data-tasks="segmentation">
+      <input checked="" id="detect" type="checkbox"/>
+      Classify heading candidates
+     </label>
+     <label class="check" data-tasks="segmentation">
+      <input checked="" id="headings" type="checkbox"/>
+      Generate headings
+     </label>
+     <label data-tasks="segmentation claimify openie">
+      Generation model
+      <input id="generation-model" value="openai:gpt-6-luna"/>
+     </label>
+     <label data-tasks="claimify claim_store">
+      Decision model
+      <input id="decision-model" value="typesafe:jev-latest"/>
+     </label>
+     <label data-tasks="segmentation claim_store">
+      Embedding model
+      <input id="embedding-model" placeholder="Automatic selection"/>
+     </label>
+     <label data-tasks="segmentation">
+      Local embedding path
+      <input id="local-path" placeholder="Optional cached model directory"/>
+     </label>
+     <label class="check" data-tasks="segmentation entities">
+      <input checked="" id="local-only" type="checkbox"/>
+      Use cached local weights only
+     </label>
+     <label data-tasks="claimify">
+      Question / context
+      <input id="question" placeholder="Optional"/>
+     </label>
+     <label data-tasks="entities">
+      Entity model
+      <input id="entity-model" value="urchade/gliner_multi-v2.1"/>
+     </label>
+     <label data-tasks="entities">
+      Entity labels
+      <input id="labels" value="company name, date, email, person name"/>
+     </label>
+     <label data-tasks="entities">
+      Confidence threshold
+      <input id="threshold" max="0.99" min="0.01" step="0.05" type="number" value="0.5"/>
+     </label>
+     <label data-tasks="claim_store">
+      Action
+      <select id="store-action">
+       <option value="save">
+        Save Claimify output as unverified
+       </option>
+       <option value="compare">
+        Save and compare with verified claims
+       </option>
+       <option value="retrieve">
+        Retrieve verified claims using source as query
+       </option>
+      </select>
+     </label>
+     <label data-tasks="claim_store">
+      Matches per claim
+      <input id="top-k" max="100" min="1" type="number" value="5"/>
+     </label>
+     <label>
+      Concurrent requests
+      <input id="concurrency" max="20" min="1" type="number" value="20"/>
+     </label>
+    </div>
+    <p>
+     Model-based tasks make real requests using server credentials. Local weights load on first use; disable cached-only mode to permit downloading them.
+    </p>
+   </details>
+   <div class="run-strip">
+    <span id="status" role="status">
+     Ready to explore
+    </span>
+    <span id="source-name">
+    </span>
+    <button hidden="" id="view-final">View final result</button>
+    <button disabled="" id="download">
+     Download result ↓
+    </button>
+   </div>
+   <section class="workspace">
+    <article class="panel source-panel">
+     <div class="panel-heading">
+      <h2>
+       <span>
+        01
+       </span>
+       Source document
+      </h2>
+      <span id="char-count">
+      </span>
+     </div>
+     <div class="legend">
+      <i>
+      </i>
+      Selected evidence
+      <span id="source-kind">
+       Original Markdown
+      </span>
+     </div>
+     <div class="markdown-controls source-controls" role="group" aria-label="Source document view">
+      <button id="source-raw-button" aria-pressed="true" aria-controls="source">Raw Markdown</button>
+      <button id="source-preview-button" aria-pressed="false" aria-controls="source-preview">Rendered preview</button>
+     </div>
+     <pre id="source" tabindex="0"></pre>
+     <div hidden="" id="source-preview"></div>
+    </article>
+    <article class="panel result-panel">
+     <div class="panel-heading">
+      <h2>
+       <span>
+        02
+       </span>
+       What changed
+      </h2>
+      <span class="badge">
+       LIVE
+      </span>
+     </div>
+     <div id="stage-summary">
+      <h3>
+       Start with your source.
+      </h3>
+      <p>
+       Lists stay intact. Every extracted statement keeps a link to its original sentence.
+      </p>
+     </div>
+     <div id="chart">
+     </div>
+     <div id="cards">
+     </div>
+     <details id="technical">
+      <summary>
+       Inspect stage details
+      </summary>
+      <pre id="details"></pre>
+     </details>
+     <div id="handoffs">
+     </div>
+    </article>
+    <article class="panel timeline-panel">
+     <div class="panel-heading">
+      <h2>
+       <span>
+        03
+       </span>
+       Processing steps
+      </h2>
+     </div>
+     <div class="playback">
+      <button aria-label="Previous logical stage" id="prev">
+       ←
+      </button>
+      <button aria-label="Next logical stage" id="next">
+       →
+      </button>
+      <label>
+       <input checked="" id="follow" type="checkbox"/>
+       Follow live
+      </label>
+      <span id="event-count">
+       0 steps
+      </span>
+     </div>
+     <p class="playback-note">
+      Toggle a stage to inspect its evidence. Follow live tracks incoming work.
+     </p>
+     <ol id="timeline">
+      <li class="empty">
+       Your processing steps will appear here as they happen.
+      </li>
+     </ol>
+    </article>
+   </section>
+   <section class="panel" hidden="" id="final-panel">
+    <div class="panel-heading">
+     <h2 id="final-title">Final result</h2>
+     <button class="primary" id="save-result">Save result</button>
+    </div>
+    <label class="save-directory">Save folder
+     <input id="save-directory" type="text" placeholder=".data/demo-results"/>
+    </label>
+    <p class="save-help">Optional: choose another local folder. Relative paths start at the server's working directory. Each run gets its own subfolder.</p>
+    <p id="final-summary"></p>
+    <div id="final-output"></div>
+    <details><summary>Complete result JSON</summary><pre id="final-json"></pre></details>
+    <p id="save-status" role="status"></p>
+   </section>
+   <section hidden="" id="store-panel">
+    <h2>
+     Human-reviewed claim store
+    </h2>
+    <p id="store-description">
+    </p>
+    <button id="refresh-claims">
+     Refresh files
+    </button>
+    <div id="store-records">
+    </div>
+   </section>
+   <footer>
+    <span>
+     DIGEST LAB / SOURCE-ALIGNED PROCESSING
+    </span>
+    <span>
+     Results are assertions for review, not independently verified facts.
+    </span>
+   </footer>
+  </main>
+  <script defer="" src="/static/presentation.js"></script>
+  <script defer="" src="/static/app.js">
+  </script>
+ </body>
+</html>

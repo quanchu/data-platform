@@ -33,7 +33,7 @@ with `text`, `label`, `score`, `start`, and `end`. Offsets are half-open Python
 character indices into the unchanged source. Empty input returns an empty list.
 Scores and selected mentions require human review.
 
-The notebook owns model loading, previews, and JSON/CSV/HTML exports. The library
+The notebook owns model loading, DataFrame previews, and JSON/CSV exports. The library
 neither reads input files nor writes exports. `light_finetune.py` remains a
 placeholder; no training workflow is implemented.
 
@@ -43,3 +43,7 @@ uv run python -m unittest discover -s tests -p 'test_gliner.py' -v
 
 Tests use a fake model and cover chunk boundaries, Unicode offsets, deduplication,
 overlap selection, empty inputs, and notebook exports without downloading weights.
+
+The live demo loads this model lazily and reuses it between runs. Chunk inference
+and final entity selection emit source-aligned observations; ordinary library
+calls need no observer. Overlap selection is a separate deterministic helper.

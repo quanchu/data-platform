@@ -5,9 +5,8 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Literal
 
-from markdown_it import MarkdownIt
 
-from .markdown import line_offsets
+from .markdown import line_offsets, parse_tokens
 from .sentences import sentence_spans
 
 _PARAGRAPH_BREAK = re.compile(r"(?:\r?\n)[^\S\r\n]*(?:\r?\n)(?:[^\S\r\n]*(?:\r?\n))*")
@@ -54,7 +53,7 @@ def paragraph_spans(text: str) -> list[tuple[int, int]]:
 def _markdown_spans(text):
     offsets = line_offsets(text)
     blocks, excluded = [], []
-    for token in MarkdownIt("commonmark").parse(text):
+    for token in parse_tokens(text):
         if token.map is None or token.level != 0:
             continue
         start, end = (offsets[i] for i in token.map)
@@ -69,6 +68,23 @@ def _markdown_spans(text):
     return blocks, sorted(excluded)
 
 
+def _is_escaped(text: str, position: int) -> bool:
+    preceding = position - 1
+    while preceding >= 0 and text[preceding] == "\\":
+        preceding -= 1
+    return (position - preceding - 1) % 2 == 1
+
+
+def _is_word_apostrophe(text: str, position: int) -> bool:
+    return (
+        text[position] in {"'", "’"}
+        and position > 0
+        and text[position - 1].isalnum()
+        and position + 1 < len(text)
+        and text[position + 1].isalnum()
+    )
+
+
 def _marked_spans(text, excluded):
     stack = []
     result = []
@@ -78,18 +94,7 @@ def _marked_spans(text, excluded):
         if any(a <= i < b for a, b in excluded):
             continue
         # Backslash-escaped marks and apostrophes inside words are not delimiters.
-        preceding = i - 1
-        while preceding >= 0 and text[preceding] == "\\":
-            preceding -= 1
-        if (i - preceding - 1) % 2:
-            continue
-        if (
-            char in {"'", "’"}
-            and i
-            and text[i - 1].isalnum()
-            and i + 1 < len(text)
-            and text[i + 1].isalnum()
-        ):
+        if _is_escaped(text, i) or _is_word_apostrophe(text, i):
             continue
         if stack and char == stack[-1][1]:
             start, _ = stack.pop()

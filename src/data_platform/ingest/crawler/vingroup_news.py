@@ -44,12 +44,20 @@ CrawlError.__module__ = __name__
 Transport.__module__ = __name__
 
 
+def _saved_urls(path: Path, *, require_content: bool = False) -> set[str]:
+    """Only completed article records count as fetched on a resumed crawl."""
+    if not path.exists():
+        return set()
+    return {
+        record["url"]
+        for record in read_records(path)
+        if not require_content
+        or (record.get("content_text") and record.get("content_html"))
+    }
+
+
 def discover(args, transport) -> int:
-    known = (
-        {record["url"] for record in read_records(args.output)}
-        if args.output.exists()
-        else set()
-    )
+    known = _saved_urls(args.output)
     pending = deque([START_URL])
     visited = set()
     fingerprints = set()
@@ -82,15 +90,7 @@ def discover(args, transport) -> int:
 
 
 def fetch(args, transport) -> int:
-    known = (
-        {
-            record["url"]
-            for record in read_records(args.output)
-            if record.get("content_text") and record.get("content_html")
-        }
-        if args.output.exists()
-        else set()
-    )
+    known = _saved_urls(args.output, require_content=True)
     attempted = failed = saved = 0
     seen = set()
     for record in read_records(args.input):

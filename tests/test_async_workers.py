@@ -55,3 +55,43 @@ class WorkerTests(unittest.IsolatedAsyncioTestCase):
                     await task
                 self.assertIs(caught.exception, failure)
             self.assertTrue(finished.is_set())
+
+
+class ConcurrencyDefaultsTests(unittest.TestCase):
+    def test_public_workflows_default_to_twenty(self):
+        import inspect
+        from data_platform.digest.claimify import extract_claims as claimify
+        from data_platform.digest.openie import extract_claims as openie
+        from data_platform.digest.claim_store import ClaimStore
+        from data_platform.digest.segmenter.texttiling import (
+            detect_document_structure,
+            generate_headings,
+            segment_with_headings,
+            texttiling_segement,
+        )
+
+        for workflow in (
+            claimify,
+            openie,
+            ClaimStore,
+            detect_document_structure,
+            generate_headings,
+            segment_with_headings,
+            texttiling_segement,
+        ):
+            with self.subTest(workflow=workflow.__name__):
+                self.assertEqual(
+                    inspect.signature(workflow).parameters["max_concurrency"].default,
+                    20,
+                )
+
+    def test_demo_accepts_twenty(self):
+        from pydantic import ValidationError
+        from data_platform.demo.models import RunRequest
+
+        self.assertEqual(RunRequest(task="segmentation").max_concurrency, 20)
+        self.assertEqual(
+            RunRequest(task="segmentation", max_concurrency=20).max_concurrency, 20
+        )
+        with self.assertRaises(ValidationError):
+            RunRequest(task="segmentation", max_concurrency=21)

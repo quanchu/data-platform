@@ -5,12 +5,27 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .._events import emit
 from ..claimify.models import ExtractionResult
 from .models import ClaimRecord, Status
 
 
 def _hash(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _claim_id(document_hash: str, source: str, claim) -> str:
+    """The serialized identity order is persisted compatibility, not incidental."""
+    identity = [
+        document_hash,
+        source,
+        claim.section_index,
+        claim.sentence_index,
+        claim.start,
+        claim.end,
+        claim.text,
+    ]
+    return _hash(json.dumps(identity, ensure_ascii=False))
 
 
 class ClaimFiles:
@@ -58,18 +73,9 @@ class ClaimFiles:
         for claim in result.claims:
             section = sections[claim.section_index]
             sentence = sentences[(claim.section_index, claim.sentence_index)]
-            identity = [
-                document_hash,
-                source,
-                claim.section_index,
-                claim.sentence_index,
-                claim.start,
-                claim.end,
-                claim.text,
-            ]
-            id = _hash(json.dumps(identity, ensure_ascii=False))
+            claim_id = _claim_id(document_hash, source, claim)
             record = ClaimRecord(
-                id=id,
+                id=claim_id,
                 text=claim.text,
                 source=source,
                 document_hash=document_hash,
@@ -82,10 +88,16 @@ class ClaimFiles:
                 end=claim.end,
                 created_at=datetime.now(timezone.utc),
             )
-            existing = self.get_claim(id)
+            existing = self.get_claim(claim_id)
             if existing is None:
-                path = self.root / "unverified" / f"{id}.json"
+                path = self.root / "unverified" / f"{claim_id}.json"
                 with path.open("x", encoding="utf-8") as stream:
                     stream.write(record.model_dump_json(indent=2) + "\n")
             records.append(existing or record)
+            emit(
+                "store_unverified",
+                spans=[(claim.start, claim.end)],
+                record=records[-1].model_dump(mode="json"),
+                existing=existing is not None,
+            )
         return records

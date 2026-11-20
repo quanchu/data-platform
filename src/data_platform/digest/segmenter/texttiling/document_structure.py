@@ -4,18 +4,12 @@ import re
 from dataclasses import dataclass, field, replace
 from typing import Literal
 
-from markdown_it import MarkdownIt
-
-from ..._text.markdown import line_offsets
+from ..._events import emit
+from ..._text.markdown import line_offsets, list_spans, parse_tokens
+from ..._text.metadata import is_metadata_line
 from ..._text.quotations import quotation_spans
 from ..._text.sentences import sentence_spans
 
-_METADATA = re.compile(
-    r"^(?:published(?:\s+date|\s+on)?|publication date|date|ngày đăng(?: bài)?|"
-    r"ngày xuất bản|đăng ngày|updated|cập nhật|author|by|tác giả)\b",
-    re.IGNORECASE,
-)
-_DATE = re.compile(r"^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}(?:\s+.*)?$")
 _URL_ONLY = re.compile(r"^(?:https?://|www\.)\S+$", re.IGNORECASE)
 _WHOLE_QUOTE = re.compile(
     r"""^(?:“[\s\S]*”|‘[\s\S]*’|"[\s\S]*"|'[\s\S]*'|«[\s\S]*»)$"""
@@ -26,7 +20,7 @@ _WHOLE_QUOTE = re.compile(
 class StructureBlock:
     start: int
     end: int
-    kind: Literal["title", "metadata", "heading"]
+    kind: Literal["title", "metadata", "heading", "list"]
     heading_level: int | None = None
     is_markdown: bool = False
 
@@ -49,15 +43,6 @@ class DocumentStructure:
     classification_skipped: bool = False
 
 
-def _is_metadata(line: str) -> bool:
-    line = line.strip()
-    if _DATE.fullmatch(line):
-        return True
-    if re.match(r"^(?i:by|author:|tác giả:)\s+[A-ZÀ-Ỹ][^.!?]{0,100}$", line):
-        return True
-    return bool(_METADATA.match(line) and re.search(r"\d", line))
-
-
 def parse_document_structure(text: str) -> DocumentStructure:
     """Recognize explicit headings and metadata locally, and collect candidates.
 
@@ -66,7 +51,7 @@ def parse_document_structure(text: str) -> DocumentStructure:
     """
     lines = text.splitlines(keepends=True)
     offsets = line_offsets(text)
-    tokens = MarkdownIt("commonmark").parse(text)
+    tokens = parse_tokens(text)
     blocks = []
     top_blocks = []
     title_seen = False
@@ -94,7 +79,7 @@ def parse_document_structure(text: str) -> DocumentStructure:
         elif token.type == "paragraph_open":
             paragraph_start = start
             if metadata_allowed:
-                while first < last and _is_metadata(lines[first]):
+                while first < last and is_metadata_line(lines[first]):
                     first += 1
                 if offsets[first] > start:
                     blocks.append(StructureBlock(start, offsets[first], "metadata"))
@@ -115,6 +100,9 @@ def parse_document_structure(text: str) -> DocumentStructure:
         }:
             top_blocks.append((start, end, "excluded"))
             metadata_allowed = False
+    protected_lists = list_spans(text)
+    blocks.extend(StructureBlock(start, end, "list") for start, end in protected_lists)
+    blocks.sort(key=lambda block: block.start)
     quotes = quotation_spans(text)
     candidates = []
     for i, (start, end, kind) in enumerate(top_blocks):
@@ -122,12 +110,13 @@ def parse_document_structure(text: str) -> DocumentStructure:
         line = raw.strip()
         if (
             kind != "paragraph"
+            or any(left < end and start < right for left, right in protected_lists)
             or any(q.start < end and q.end > start for q in quotes)
             or len(line.splitlines()) != 1
             or len(line) > 240
             or len(re.findall(r"\w+", line)) > 40
             or not re.search(r"\w", line)
-            or _is_metadata(line)
+            or is_metadata_line(line)
             or _URL_ONLY.fullmatch(line)
             or _WHOLE_QUOTE.fullmatch(line)
         ):
@@ -146,6 +135,13 @@ def parse_document_structure(text: str) -> DocumentStructure:
             text[slice(*top_blocks[i + 1][:2])] if i + 1 < len(top_blocks) else ""
         )
         candidates.append(HeadingCandidate(start, end, raw, previous, following))
+    for block in blocks:
+        emit(
+            "markdown_structure",
+            spans=[(block.start, block.end)],
+            kind=block.kind,
+            excluded_from_scoring=True,
+        )
     return DocumentStructure(text, tuple(blocks), tuple(candidates))
 
 
@@ -182,7 +178,7 @@ def confirm_candidates(
             if not line.strip():
                 cursor += len(line)
                 continue
-            if not _is_metadata(line):
+            if not is_metadata_line(line):
                 break
             if metadata_start is None:
                 metadata_start = cursor

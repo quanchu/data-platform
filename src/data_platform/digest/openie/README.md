@@ -16,7 +16,7 @@ result = await extract_claims(
     "# Report\n\n## Factory\n\nAcme builds cars. It plans buses in 2027.",
     resolution_model="openai:gpt-6-luna",
     extraction_model="openai:gpt-6-luna",
-    max_concurrency=4,
+    max_concurrency=20,
 )
 for claim in result.claims:
     print(claim.subject, claim.relation, claim.object, claim.qualifiers)
@@ -64,6 +64,7 @@ Dedicated model integrations implement either exported async protocol:
 # ReferenceResolver
 async def resolve(*, title, section) -> ResolutionResponse: ...
 
+
 # PropositionExtractor
 async def extract(*, sentence, resolved) -> ExtractionResponse: ...
 ```
@@ -96,3 +97,8 @@ with `--resolution-model` and `--extraction-model`. Review reference correctness
 entailment, qualifier preservation, and coverage; status matches are diagnostic.
 See [the notebook](../../../../notebooks/openie.ipynb) for intermediate inspection
 and an adapter example.
+
+Resolution workers return their stage records and resolved sentences; extraction
+starts after all resolution work finishes. Workers return sentence results for
+ordered assembly instead of mutating a shared result dictionary. The live demo
+observes both stages while preserving the public protocols and provenance.

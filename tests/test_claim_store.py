@@ -1,5 +1,7 @@
 """Offline storage, retrieval and comparison contracts."""
 
+from support import Embeddings
+
 import asyncio
 import json
 import tempfile
@@ -32,23 +34,6 @@ def extraction(text="Acme revenue was $10m in 2025."):
             )
         ],
     )
-
-
-class Embeddings(TestEmbeddingModel):
-    def __init__(self, name="deterministic"):
-        super().__init__(model_name=name)
-        self.calls = []
-        self.fail = False
-
-    async def embed(self, inputs, *, input_type, settings=None):
-        if self.fail:
-            raise RuntimeError("embedding failed")
-        response = await super().embed(inputs, input_type=input_type, settings=settings)
-        self.calls.append((list(response.inputs), input_type))
-        response.embeddings = [
-            [1.0, 0.0] if "revenue" in text else [0.0, 1.0] for text in response.inputs
-        ]
-        return response
 
 
 class StoreTests(unittest.IsolatedAsyncioTestCase):

@@ -8,6 +8,7 @@ from collections import Counter
 from dataclasses import replace
 from typing import Literal
 
+from ..._events import emit
 from ..._text.quotations import body_spans, prose_paragraphs
 from .document_structure import (
     DocumentStructure,
@@ -17,6 +18,10 @@ from .document_structure import (
 from .models import Section
 
 _WORD = re.compile(r"[^\W_]+(?:[\u0300-\u036f][^\W_]*)*", re.UNICODE)
+
+_TOKENS_PER_BLOCK = 20
+_CONTEXT_BLOCKS = 4
+_MAX_PROSE_PARAGRAPHS = 4
 
 
 def _cosine(left: Counter, right: Counter) -> float:
@@ -43,12 +48,15 @@ def _topic_boundaries(
     start, end = paragraphs[0][0], paragraphs[-1][1]
     matches = list(_WORD.finditer(text, start, end))
     tokens = [unicodedata.normalize("NFC", m.group()).casefold() for m in matches]
-    blocks = [Counter(tokens[i : i + 20]) for i in range(0, len(tokens), 20)]
+    blocks = [
+        Counter(tokens[i : i + _TOKENS_PER_BLOCK])
+        for i in range(0, len(tokens), _TOKENS_PER_BLOCK)
+    ]
     if len(blocks) < 4:
         return []
     scores = []
     for gap in range(1, len(blocks)):
-        width = min(4, gap, len(blocks) - gap)
+        width = min(_CONTEXT_BLOCKS, gap, len(blocks) - gap)
         left = sum(blocks[gap - width : gap], Counter())
         right = sum(blocks[gap : gap + width], Counter())
         if tfidf is None:
@@ -56,18 +64,35 @@ def _topic_boundaries(
         else:
             windows = tfidf.transform(
                 [
-                    " ".join(tokens[(gap - width) * 20 : gap * 20]),
-                    " ".join(tokens[gap * 20 : (gap + width) * 20]),
+                    " ".join(
+                        tokens[
+                            (gap - width) * _TOKENS_PER_BLOCK : gap * _TOKENS_PER_BLOCK
+                        ]
+                    ),
+                    " ".join(
+                        tokens[
+                            gap * _TOKENS_PER_BLOCK : (gap + width) * _TOKENS_PER_BLOCK
+                        ]
+                    ),
                 ]
             )
             scores.append(float(windows[0].multiply(windows[1]).sum()))
-    positions = [matches[(i + 1) * 20].start() for i in range(len(scores))]
+    positions = [
+        matches[(i + 1) * _TOKENS_PER_BLOCK].start() for i in range(len(scores))
+    ]
     return _select_boundaries(scores, positions, paragraphs)
 
 
 def _select_boundaries(scores, positions, paragraphs) -> list[int]:
     """Select depth peaks and align them to original paragraph offsets."""
     if len(scores) < 3:
+        emit(
+            "gap_scores",
+            positions=positions,
+            similarity=scores,
+            depths=[],
+            boundaries=[],
+        )
         return []
     smooth = [
         sum(scores[max(0, i - 1) : i + 2]) / len(scores[max(0, i - 1) : i + 2])
@@ -98,6 +123,15 @@ def _select_boundaries(scores, positions, paragraphs) -> list[int]:
                 key=lambda j: abs(paragraphs[j][0] - position),
             )
             boundaries.add(boundary)
+    emit(
+        "gap_scores",
+        positions=positions,
+        similarity=scores,
+        depths=depths,
+        threshold=max(1e-10, mean - std / 2),
+        boundaries=[paragraphs[index][0] for index in sorted(boundaries)],
+        spans=[(paragraphs[0][0], paragraphs[-1][1])],
+    )
     return sorted(boundaries)
 
 
@@ -111,8 +145,11 @@ def _segment_body(text: str, boundary_function) -> list[Section]:
         paragraphs = prose_paragraphs(text, start, end)
         boundaries = [0, *boundary_function(text, paragraphs), len(paragraphs)]
         for begin, finish in itertools.pairwise(boundaries):
-            for cursor in range(begin, finish, 4):
-                a, b = paragraphs[cursor][0], paragraphs[min(cursor + 4, finish) - 1][1]
+            for cursor in range(begin, finish, _MAX_PROSE_PARAGRAPHS):
+                a, b = (
+                    paragraphs[cursor][0],
+                    paragraphs[min(cursor + _MAX_PROSE_PARAGRAPHS, finish) - 1][1],
+                )
                 sections.append(Section(text[a:b], a, b, "prose"))
     return sections
 
@@ -144,6 +181,13 @@ def _segment(
             replace(section, start=section.start + start, end=section.end + start)
             for section in _segment_body(text[start:end], boundaries)
         )
+    for section in sections:
+        emit(
+            "section",
+            spans=[(section.start, section.end)],
+            kind=section.kind,
+            text=section.text,
+        )
     return sections
 
 
@@ -169,7 +213,8 @@ def _fit_tfidf(text: str, structure: DocumentStructure | None = None):
             for a, b in prose_paragraphs(body, start, end):
                 tokens = _lexical_tokens(body[a:b])
                 blocks.extend(
-                    " ".join(tokens[i : i + 20]) for i in range(0, len(tokens), 20)
+                    " ".join(tokens[i : i + _TOKENS_PER_BLOCK])
+                    for i in range(0, len(tokens), _TOKENS_PER_BLOCK)
                 )
     if not blocks:
         return None

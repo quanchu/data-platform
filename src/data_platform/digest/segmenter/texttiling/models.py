@@ -11,7 +11,7 @@ class Section:
     text: str
     start: int
     end: int
-    kind: Literal["prose", "quote", "title", "metadata", "heading"]
+    kind: Literal["prose", "quote", "title", "metadata", "heading", "list"]
     heading: str | None = None
     heading_level: int | None = None
     heading_is_markdown: bool = False

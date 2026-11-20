@@ -1,6 +1,7 @@
 """Public and persisted contracts captured before the structural refactor."""
 
 import hashlib
+import importlib
 import inspect
 import json
 import sqlite3
@@ -11,9 +12,7 @@ import unittest
 from contextlib import closing
 from pathlib import Path
 
-from test_claim_store import Embeddings
-from test_claimify import models
-from test_openie import Extractor, Resolver
+from support import Embeddings, models, Extractor, Resolver
 
 from data_platform.digest import claimify, openie
 from data_platform.digest.claim_store import ClaimStore
@@ -122,9 +121,19 @@ class CompatibilityTests(unittest.IsolatedAsyncioTestCase):
         )
 
     def test_prompts_unchanged(self):
-        root = Path(__file__).resolve().parents[1]
-        expected = json.loads(FIXTURE.with_name("prompts.json").read_text())
-        for name, digest in expected.items():
-            self.assertEqual(
-                hashlib.sha256((root / name).read_bytes()).hexdigest(), digest
-            )
+        expected = json.loads(FIXTURE.with_name("prompt_values.json").read_text())
+        for path, value in expected.items():
+            parts = path.split(".")
+            if parts[-2][:1].isupper():
+                module = importlib.import_module(
+                    "data_platform.digest." + ".".join(parts[:-2])
+                )
+                actual = getattr(module, parts[-2]).model_fields[parts[-1]].description
+            else:
+                module_name = ".".join(parts[:-1])
+                if module_name == "claimify.extractor":
+                    module_name = "claimify.prompts"
+                module = importlib.import_module("data_platform.digest." + module_name)
+                actual = getattr(module, parts[-1])
+            with self.subTest(prompt=path):
+                self.assertEqual(actual, value)

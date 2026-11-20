@@ -27,3 +27,5 @@ wheels/
 .data/claims-demo/
 .data/gliner/
 .data/reports/
+
+.data/demo-results/

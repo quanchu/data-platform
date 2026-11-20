@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import AwareDatetime, Field, model_validator
 
+from . import prompts
 from ..source import Record, Text
 
 Status = Literal["unverified", "verified"]
@@ -33,12 +34,7 @@ class ClaimRecord(Record):
 
 class ComparisonDecision(Record):
     verdict: Verdict = Field(
-        description=(
-            "Are these assertions conflict (incompatible entity/property/time/scope), "
-            "equivalent (same fact), compatible (related and jointly possible), "
-            "unrelated (different subject/property), or uncertain (insufficient context)? "
-            "Preserve attribution, dates, units, negation and planned versus completed actions."
-        )
+        description=prompts.COMPARISON_VERDICT,
     )
 
 

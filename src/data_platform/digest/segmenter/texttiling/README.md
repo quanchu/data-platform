@@ -12,7 +12,7 @@ from data_platform.digest.segmenter.texttiling import (
 
 structure = await detect_document_structure(markdown_doc)
 sections = await segment_article_semantic(markdown_doc, structure=structure)
-headed = await generate_headings(sections, article_text=markdown_doc, max_concurrency=4)
+headed = await generate_headings(sections, article_text=markdown_doc, max_concurrency=20)
 segmented_doc = render_markdown(headed)
 ```
 
@@ -24,7 +24,7 @@ backend comparisons, headings, display, and saving. In scripts use `asyncio.run`
 `detect_document_structure(markdown_doc, decision_model="openai:gpt-6-luna")`
 recognizes explicit Markdown structure locally, then classifies rule-filtered
 unformatted heading candidates with a Pydantic-validated `is_heading: StrictBool`
-response. It accepts configured model instances and `max_concurrency=4`, with two
+response. It accepts configured model instances and `max_concurrency=20`, with two
 output-validation retries. A candidate is a standalone, single-line paragraph
 containing at most one sentence, up to 40 lexical tokens and 240 characters;
 short labels without punctuation are allowed. Metadata, bylines, lists, quotations,
@@ -175,7 +175,7 @@ generated headings. Context resolves references rather than replacing the target
 
 Structured output validates nonempty, single-line headings with two output retries.
 Grammar and factual rules are prompt requirements and need review; they are not
-mechanically guaranteed. `max_concurrency=4` bounds simultaneous section requests;
+mechanically guaranteed. `max_concurrency=20` bounds simultaneous section requests;
 use one for sequential generation. Results preserve input order and inputs are
 not mutated. On failure, remaining workers are cancelled and awaited;
 `HeadingGenerationError.section_index` identifies the failed section and its cause.
@@ -204,3 +204,36 @@ Configure credentials in the process environment for hosted checks. Set
 the local smoke test to require cached weights. Live tests report boundaries and
 headings for review rather than asserting a fixed section count. No crawler
 integration is added.
+
+## Lists and source structure
+
+The shared Markdown adapter uses `markdown-it-py` syntax trees and original line
+maps. An outermost list becomes a `Section(kind="list")`, retaining nested items,
+continuation paragraphs, code, and quotations. A directly preceding colon-ended
+paragraph is attached as its introduction. No generated heading splits that unit.
+The four-paragraph prose cap does not apply to lists.
+
+Lists and attached introductions are excluded from TF-IDF fitting, lexical
+similarity, and semantic embedding requests. Prose runs on either side are scored
+independently, so unrelated items cannot distort their depth thresholds. Existing
+heading suppression also applies to list sections. Lists inside block quotations
+remain part of their containing quotation.
+
+Instruction strings for heading decisions and generation live in `prompts.py`.
+Original imports remain available. The live demo observes structural spans, score
+curves, boundaries, and headings through private per-run events.
+
+## Credentials by processing step
+
+- `segment_article(..., vectorizer="counts" | "tfidf")` and local Markdown parsing need no API key.
+- `segment_article_semantic(..., embedding_model=None)` selects OpenAI embeddings when `OPENAI_API_KEY` is nonblank; otherwise it selects local E5. An explicit local model keeps embeddings local even when a key exists. `local_files_only` controls local weight downloads; it does not force a local backend.
+- `detect_document_structure()` defaults to OpenAI for heading candidates. Without an OpenAI key, it skips those model classifications and keeps locally recognized structure.
+- `generate_headings()` defaults to OpenAI and requires credentials when there are eligible sections; it does not silently skip failures.
+- `segment_with_headings()` / `texttiling_segement()` combine classification, semantic segmentation, and heading generation, so their defaults are not entirely offline.
+
+Notebooks load the project `.env` through `setup_notebook()`. Direct library callers
+must load it themselves or supply process credentials/configured model objects.
+The article notebook's `method="counts"` and `run_headings=False` defaults are offline.
+Concurrency defaults to 20 for classification and heading generation. Embedding
+batches remain sequential; GLiNER inference and the end-to-end LLM segmenter's
+single request do not have a `max_concurrency` parameter.

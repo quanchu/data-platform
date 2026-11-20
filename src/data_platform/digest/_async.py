@@ -37,3 +37,15 @@ async def ordered_map[T, R](
         await asyncio.gather(*tasks, return_exceptions=True)
         raise
     return cast(list[R], results)
+
+
+async def run_blocking[**P, R](
+    function: Callable[P, R], *args: P.args, **kwargs: P.kwargs
+) -> R:
+    """Wait for an already-running thread before propagating cancellation."""
+    worker = asyncio.create_task(asyncio.to_thread(function, *args, **kwargs))
+    try:
+        return await asyncio.shield(worker)
+    except asyncio.CancelledError:
+        await asyncio.gather(worker, return_exceptions=True)
+        raise

@@ -2,6 +2,8 @@
 
 from pydantic_ai.models import Model
 
+from .._events import emit
+from .prompts import RESOLVE, EXTRACT
 from .._async import ordered_map, positive_int
 from ..source import parse_document
 from .backends import (
@@ -39,7 +41,7 @@ async def extract_claims(
     extractor: PropositionExtractor | None = None,
     resolution_model: str | Model = DEFAULT_MODEL,
     extraction_model: str | Model = DEFAULT_MODEL,
-    max_concurrency: int = 4,
+    max_concurrency: int = 20,
 ) -> ExtractionResult:
     positive_int(max_concurrency, "max_concurrency")
     document = parse_document(markdown_doc)
@@ -53,27 +55,37 @@ async def extract_claims(
         else LLMPropositionExtractor(extraction_model)
     )
     sections = iter(s for s in document.sections if s.sentences)
-    resolved_by_id = {}
 
     async def resolve_section(section):
+        spans = [(section.start, section.end)]
+        emit("resolution", status="running", spans=spans, prompt=RESOLVE)
         try:
             response = await resolver.resolve(
                 title=document.title, section=section.model_copy(deep=True)
             )
             response = ResolutionResponse.model_validate(response.model_dump())
             validate_resolution(response, section)
-            result.resolution_stages[section.index] = StageRecord(
+            record = StageRecord(
                 stage="resolution",
                 output={"sentences": [s.model_dump() for s in response.sentences]},
                 metadata=response.metadata,
             )
-            resolved_by_id.update((s.sentence_index, s) for s in response.sentences)
+            emit("resolution", spans=spans, output=response.model_dump(mode="json"))
+            return section.index, record, response.sentences
         except Exception as exc:
+            emit("resolution", status="failed", spans=spans, error=str(exc))
             raise OpenIEError(section.index, None, "resolution") from exc
 
-    await ordered_map(resolve_section, sections, max_concurrency=max_concurrency)
+    resolutions = await ordered_map(
+        resolve_section, sections, max_concurrency=max_concurrency
+    )
+    result.resolution_stages = {index: record for index, record, _ in resolutions}
+    resolved_by_id = {
+        sentence.sentence_index: sentence
+        for _, _, sentences in resolutions
+        for sentence in sentences
+    }
     pending = iter(s for section in document.sections for s in section.sentences)
-    outputs = {}
 
     async def extract_sentence(sentence):
         resolved = resolved_by_id[sentence.index]
@@ -84,9 +96,16 @@ async def extract_claims(
             if resolved.status == "unresolved"
             else "no_claims",
         )
-        outputs[sentence.index] = output
         if resolved.status == "unresolved":
-            return
+            emit(
+                "extraction",
+                status="skipped",
+                spans=[(sentence.start, sentence.end)],
+                reason="Unresolved ambiguity",
+            )
+            return output
+        spans = [(sentence.start, sentence.end)]
+        emit("extraction", status="running", spans=spans, prompt=EXTRACT)
         try:
             response = await extractor.extract(
                 sentence=sentence.model_copy(deep=True),
@@ -114,14 +133,19 @@ async def extract_claims(
             ]
             if output.claims:
                 output.status = "extracted"
+            emit("extraction", spans=spans, output=output.model_dump(mode="json"))
+            return output
         except Exception as exc:
+            emit("extraction", status="failed", spans=spans, error=str(exc))
             raise OpenIEError(
                 sentence.section_index, sentence.index, "extraction"
             ) from exc
 
-    await ordered_map(extract_sentence, pending, max_concurrency=max_concurrency)
+    outputs = await ordered_map(
+        extract_sentence, pending, max_concurrency=max_concurrency
+    )
     result.resolution_stages = dict(sorted(result.resolution_stages.items()))
-    result.sentences = [outputs[i] for i in sorted(outputs)]
+    result.sentences = outputs
     result.claims = [
         claim for sentence in result.sentences for claim in sentence.claims
     ]

@@ -1,8 +1,10 @@
+> Historical design notes. For current behavior and usage, see [README.md](README.md).
+
 # Claimify implementation
 
 ## Contract
 
-The async `extract_claims(markdown_doc, *, question=None, decision_model="typesafe:jev-latest", generation_model="openai:gpt-6-luna", max_concurrency=4)` API consumes already segmented Markdown. Exactly one H1 title and nonempty H2 subtitles are required. Body content belongs beneath an H2. H3–H6 remain within their H2 section. Blank input produces no requests.
+The async `extract_claims(markdown_doc, *, question=None, decision_model="typesafe:jev-latest", generation_model="openai:gpt-6-luna", max_concurrency=20)` API consumes already segmented Markdown. Exactly one H1 title and nonempty H2 subtitles are required. Body content belongs beneath an H2. H3–H6 remain within their H2 section. Blank input produces no requests.
 
 Each sentence receives the document title, enclosing subtitle, complete original section body, original target sentence/index, and optional question. Context never crosses sections. Headings are context, not extraction targets. Original half-open Python character offsets are retained. Code, HTML blocks and tables are excluded from extraction and reported as excluded spans, but remain in source context.
 

@@ -21,7 +21,7 @@ class ClaimStore:
         *,
         embedding_model: str | EmbeddingModel = "openai:text-embedding-3-small",
         comparison_model: str | Model = "typesafe:jev-latest",
-        max_concurrency: int = 4,
+        max_concurrency: int = 20,
     ):
         positive_int(max_concurrency, "max_concurrency")
         self.root = Path(root)

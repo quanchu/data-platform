@@ -17,7 +17,7 @@ result = await extract_claims(
     question=None,
     decision_model="typesafe:jev-latest",
     generation_model="openai:gpt-6-luna",
-    max_concurrency=4,
+    max_concurrency=20,
 )
 for claim in result.claims:
     print(claim.text, claim.start, claim.end)
@@ -74,3 +74,12 @@ report for human semantic review; use a new output path. Offline tests do not pr
 claim accuracy. See [implementation notes](IMPLEMENTATION_PLAN.md),
 [the notebook](../../../../notebooks/claimify.ipynb), and
 [OpenIE](../openie/README.md) for the tuple-based alternative.
+
+## Reading and observing the workflow
+
+`extractor.py` separates model-stage execution, checked rewrites, claim generation,
+and sentence orchestration. Each sentence owns its request context and trace.
+`decisions.py` defines typed outputs; all semantic field questions and generation
+instructions live in `prompts.py`. Exact prompt-value tests protect their wording.
+The optional live demo observes each actual stage, including repair attempts,
+without changing the public extraction API.

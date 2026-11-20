@@ -1,5 +1,7 @@
 """Chunked GLiNER inference with source-aligned entity selection."""
 
+from .._events import emit
+
 
 def _iter_chunks(text: str, model, chunk_words: int, chunk_overlap: int):
     tokens = list(model.data_processor.words_splitter(text))
@@ -33,8 +35,10 @@ def extract_entities(
 
     unique = {}
     for base, chunk in _iter_chunks(text, model, chunk_words, chunk_overlap):
+        emit("entity_chunk", status="running", spans=[(base, base + len(chunk))])
         with torch.inference_mode():
             predictions = model.predict_entities(chunk, labels, threshold=threshold)
+        emit("entity_chunk", spans=[(base, base + len(chunk))], predictions=predictions)
         for prediction in predictions:
             start = base + int(prediction["start"])
             end = base + int(prediction["end"])
@@ -50,13 +54,22 @@ def extract_entities(
             key = (start, end, entity["label"])
             if key not in unique or entity["score"] > unique[key]["score"]:
                 unique[key] = entity
+    return _select_entities(list(unique.values()))
+
+
+def _select_entities(entities: list[dict]) -> list[dict]:
+    """Prefer confidence, then source order, when candidate mentions overlap."""
     selected = []
-    for entity in sorted(
-        unique.values(), key=lambda e: (-e["score"], e["start"], e["end"])
-    ):
+    for entity in sorted(entities, key=lambda e: (-e["score"], e["start"], e["end"])):
         if not any(
             entity["start"] < other["end"] and other["start"] < entity["end"]
             for other in selected
         ):
             selected.append(entity)
-    return sorted(selected, key=lambda e: (e["start"], e["end"]))
+    selected.sort(key=lambda entity: (entity["start"], entity["end"]))
+    emit(
+        "entity_selection",
+        spans=[(entity["start"], entity["end"]) for entity in selected],
+        entities=selected,
+    )
+    return selected

@@ -24,6 +24,14 @@ from data_platform.digest.segmenter.texttiling import segment_article
 sections = segment_article("Đoạn văn đầu tiên.\n\nĐoạn văn thứ hai.")
 ```
 
+Notebooks use pandas DataFrames for sections, claims, entities, and comparisons.
+Shared setup, DataFrame conversion, sentence rows, and JSON export helpers live in
+[`notebooks/utils.py`](notebooks/utils.py). Open the notebooks in Jupyter so their
+kernels run from the notebook directory and can import the adjacent `utils` module.
+Each follows setup, configuration, processing, review, and optional export. Model
+calls are opt-in (`run_live=True`, or the explicit segmentation model settings);
+saved outputs are cleared so a fresh kernel starts cleanly.
+
 Libraries read process credentials; notebooks load `.env` without overriding the
 existing environment. See `.env.example`. Model-based workflows accept configured
 model objects for injection. Provider errors do not silently switch backends.
@@ -80,3 +88,29 @@ downloads. Component guides describe opt-in live checks. Offline tests cover
 structure, provenance, persistence, concurrency, and compatibility; semantic model
 quality still requires review. Existing JSON claims and SQLite caches need no
 migration after the internal refactor.
+
+## Live processing demo
+
+```sh
+uv sync --extra demo --extra offline
+uv run python -m data_platform.demo
+```
+
+Open `http://127.0.0.1:8765`. The local application shows real processing events,
+source highlights, similarity/depth charts, and task results. Start with the
+**list-aware** example and lexical segmentation, which needs no provider calls.
+See the [demo walkthrough](src/data_platform/demo/README.md) for model setup,
+extraction handoffs, and manual claim review.
+
+## Internal organization
+
+Shared Markdown tokenization and source-mapped block trees live in `digest/_text`.
+Each processing component owns its orchestration and `prompts.py`, including the
+questions attached to typed decision fields. Private event observers provide demo
+progress without changing public library signatures. Ordinary library calls have
+no observer and do not depend on the web application.
+
+Lists are now structural segmentation units. Nested items and continuation
+paragraphs stay together; their contents do not affect surrounding prose scores.
+The added `list` section kind is the intentional compatibility extension in this
+readability pass. Existing public imports and stored claim formats are preserved.

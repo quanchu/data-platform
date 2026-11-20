@@ -2,10 +2,11 @@
 
 from typing import Annotated
 
-from markdown_it import MarkdownIt
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
-from ._text.markdown import line_offsets
+from ._events import emit
+from ._text.markdown import line_offsets, parse_tokens
+from ._text.metadata import is_metadata_line
 from ._text.sentences import sentence_spans
 
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
@@ -39,11 +40,43 @@ class Document(Record):
     sections: list[Section] = Field(default_factory=list)
 
 
+def _excluded_spans(tokens, offsets: list[int], start: int, end: int) -> list[Span]:
+    excluded = []
+    for token in tokens:
+        if token.map is None or token.type not in {
+            "fence",
+            "code_block",
+            "html_block",
+            "table_open",
+        }:
+            continue
+        block_start, block_end = (offsets[line] for line in token.map)
+        if start <= block_start < end:
+            excluded.append(Span(start=block_start, end=block_end))
+    return excluded
+
+
+def _paragraph_ranges(tokens, offsets: list[int], section: Section):
+    """Yield eligible paragraph source ranges, including paragraphs in list items."""
+    for index, token in enumerate(tokens):
+        if (
+            token.type != "inline"
+            or token.map is None
+            or tokens[index - 1].type != "paragraph_open"
+        ):
+            continue
+        start, end = (offsets[line] for line in token.map)
+        if section.start <= start < section.end and not any(
+            span.start <= start < span.end for span in section.excluded_spans
+        ):
+            yield start, end
+
+
 def parse_document(source: str) -> Document:
     if not source.strip():
         return Document(title="")
     offsets = line_offsets(source)
-    tokens = MarkdownIt("commonmark").enable("table").parse(source)
+    tokens = parse_tokens(source, tables=True)
     headings = []
     for i, token in enumerate(tokens):
         if token.type == "heading_open" and token.level == 0:
@@ -57,7 +90,10 @@ def parse_document(source: str) -> Document:
         raise ValueError("Document requires nonempty H2 section subtitles")
     if source[: offsets[title.map[0]]].strip() or subtitles[0][0].map[0] < title.map[1]:
         raise ValueError("H1 must precede all section content")
-    if source[offsets[title.map[1]] : offsets[subtitles[0][0].map[0]]].strip():
+    preamble = source[offsets[title.map[1]] : offsets[subtitles[0][0].map[0]]]
+    if any(
+        line.strip() and not is_metadata_line(line) for line in preamble.splitlines()
+    ):
         raise ValueError("Body content must be beneath an H2 subtitle")
     sections = []
     sentence_index = 0
@@ -71,30 +107,11 @@ def parse_document(source: str) -> Document:
         section = Section(
             index=index, subtitle=subtitle, start=start, end=end, text=source[start:end]
         )
-        excluded = []
-        for token in tokens:
-            if token.map is None:
-                continue
-            a, b = (offsets[n] for n in token.map)
-            if start <= a < end and token.type in {
-                "fence",
-                "code_block",
-                "html_block",
-                "table_open",
-            }:
-                excluded.append(Span(start=a, end=b))
-        section.excluded_spans = excluded
-        for i, token in enumerate(tokens):
-            if (
-                token.type != "inline"
-                or token.map is None
-                or tokens[i - 1].type != "paragraph_open"
-            ):
-                continue
-            a, b = (offsets[n] for n in token.map)
-            if not start <= a < end or any(s.start <= a < s.end for s in excluded):
-                continue
-            for left, right in sentence_spans(source, a, b):
+        section.excluded_spans = _excluded_spans(tokens, offsets, start, end)
+        for paragraph_start, paragraph_end in _paragraph_ranges(
+            tokens, offsets, section
+        ):
+            for left, right in sentence_spans(source, paragraph_start, paragraph_end):
                 section.sentences.append(
                     Sentence(
                         index=sentence_index,
@@ -106,4 +123,10 @@ def parse_document(source: str) -> Document:
                 )
                 sentence_index += 1
         sections.append(section)
-    return Document(title=title_text, sections=sections)
+    document = Document(title=title_text, sections=sections)
+    emit(
+        "source_parsing",
+        spans=[(s.start, s.end) for s in sections],
+        document=document.model_dump(),
+    )
+    return document

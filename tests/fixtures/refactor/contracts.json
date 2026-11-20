@@ -1655,13 +1655,13 @@
     ]
   },
   "signatures": {
-    "claimify": "(markdown_doc: str, *, question: str | None = None, decision_model: str | pydantic_ai.models.Model = 'typesafe:jev-latest', generation_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', max_concurrency: int = 4) -> data_platform.digest.claimify.models.ExtractionResult",
-    "openie": "(markdown_doc: str, *, resolver: data_platform.digest.openie.backends.ReferenceResolver | None = None, extractor: data_platform.digest.openie.backends.PropositionExtractor | None = None, resolution_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', extraction_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', max_concurrency: int = 4) -> data_platform.digest.openie.models.ExtractionResult",
-    "store": "(root: str | pathlib.Path = '.data/claims', *, embedding_model: str | pydantic_ai.embeddings.base.EmbeddingModel = 'openai:text-embedding-3-small', comparison_model: str | pydantic_ai.models.Model = 'typesafe:jev-latest', max_concurrency: int = 4)",
+    "claimify": "(markdown_doc: str, *, question: str | None = None, decision_model: str | pydantic_ai.models.Model = 'typesafe:jev-latest', generation_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', max_concurrency: int = 20) -> data_platform.digest.claimify.models.ExtractionResult",
+    "openie": "(markdown_doc: str, *, resolver: data_platform.digest.openie.backends.ReferenceResolver | None = None, extractor: data_platform.digest.openie.backends.PropositionExtractor | None = None, resolution_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', extraction_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', max_concurrency: int = 20) -> data_platform.digest.openie.models.ExtractionResult",
+    "store": "(root: str | pathlib.Path = '.data/claims', *, embedding_model: str | pydantic_ai.embeddings.base.EmbeddingModel = 'openai:text-embedding-3-small', comparison_model: str | pydantic_ai.models.Model = 'typesafe:jev-latest', max_concurrency: int = 20)",
     "retrieve": "(self, text: str, top_k: int = 20) -> list[data_platform.digest.claim_store.RetrievalMatch]",
     "check": "(self, records: list[data_platform.digest.claim_store.ClaimRecord], top_k: int = 20) -> data_platform.digest.claim_store.CheckReport",
     "store_unverified": "(self, result: data_platform.digest.claimify.models.ExtractionResult, *, source: str) -> list[data_platform.digest.claim_store.ClaimRecord]",
     "segment_article": "(text: str, *, vectorizer: Literal['counts', 'tfidf'] = 'counts', structure: data_platform.digest.segmenter.texttiling.document_structure.DocumentStructure | None = None) -> list[data_platform.digest.segmenter.texttiling.models.Section]",
-    "texttiling_segement": "(markdown_doc: str, *, model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', embedding_model: str | pydantic_ai.embeddings.base.EmbeddingModel | None = None, max_concurrency: int = 4, local_files_only: bool = False, local_model_path: str | None = None, decision_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna') -> str"
+    "texttiling_segement": "(markdown_doc: str, *, model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna', embedding_model: str | pydantic_ai.embeddings.base.EmbeddingModel | None = None, max_concurrency: int = 20, local_files_only: bool = False, local_model_path: str | None = None, decision_model: str | pydantic_ai.models.Model = 'openai:gpt-6-luna') -> str"
   }
 }

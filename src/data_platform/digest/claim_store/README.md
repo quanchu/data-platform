@@ -13,12 +13,12 @@ out or deleting it withdraws approval at the next synchronization.
 from data_platform.digest.claimify import extract_claims
 from data_platform.digest.claim_store import ClaimStore
 
-store = ClaimStore('.data/claims')
+store = ClaimStore(".data/claims")
 result = await extract_claims(markdown)
-records = store.store_unverified(result, source='article.md')
+records = store.store_unverified(result, source="article.md")
 
 # Manually move approved <id>.json files from unverified/ to verified/.
-matches = await store.retrieve('Acme revenue was $10m in 2025', top_k=20)
+matches = await store.retrieve("Acme revenue was $10m in 2025", top_k=20)
 report = await store.check(records, top_k=20)
 for pair in report.review_required:
     print(pair.decision.verdict, pair.claim.text, pair.verified_claim.text)
@@ -47,7 +47,7 @@ Embeddings default to `openai:text-embedding-3-small`, and comparisons to
 Pass `embedding_model` (a string or Pydantic AI `EmbeddingModel`) and
 `comparison_model` (a string or Pydantic AI `Model`) to inject alternatives.
 Injected embedding models must expose distinct provider/model identifiers when
-vector semantics change. Comparisons run with `max_concurrency=4` by default.
+vector semantics change. Comparisons run with `max_concurrency=20` by default.
 If a comparison fails or the caller cancels a check, outstanding comparison
 workers are cancelled and awaited before the error propagates.
 
@@ -69,3 +69,8 @@ The semantic evaluation cases in `tests/fixtures/claim_store/comparisons.json`
 include manually reviewed expected verdicts. They can be sent to the comparison
 agent to evaluate a configured model; deterministic unit tests validate plumbing,
 not live model accuracy.
+
+Comparison instructions and decision-field wording live in `prompts.py`. Cache
+reuse selection is separate from embedding refresh and transactional SQLite
+updates. The demo displays retrieval and comparison events, but approval remains
+manual file placement. No schema or cache migration is required.
