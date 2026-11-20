@@ -4,6 +4,8 @@ Python tools for article ingestion, segmentation, extraction, entity tagging, an
 human-reviewed claim storage. The workflows remain independent Python APIs;
 notebooks demonstrate how to use them.
 
+Documentation: [guides and workflow index](docs/README.md).
+
 ## Setup
 
 From the repository root:
@@ -67,6 +69,7 @@ in `verified/`.
 src/data_platform/
     digest/          # text processing, extraction, tagging, and claim storage
     ingest/          # crawling and persistence
+docs/                # documentation index and demo quickstart
 notebooks/           # workflows using the installed package
 tests/               # offline contracts and opt-in model smoke tests
 .data/               # tracked article examples and local generated artifacts
@@ -97,8 +100,9 @@ uv run python -m data_platform.demo
 ```
 
 Open `http://127.0.0.1:8765`. The local application shows real processing events,
-source highlights, similarity/depth charts, and task results. Start with the
-**list-aware** example and lexical segmentation, which needs no provider calls.
+source highlights, similarity/depth charts, and task results. Choose an article from `.data/`. The UI defaults to live semantic segmentation
+and heading generation; lexical counts with heading options disabled needs no
+provider calls.
 See the [demo walkthrough](src/data_platform/demo/README.md) for model setup,
 extraction handoffs, and manual claim review.
 
